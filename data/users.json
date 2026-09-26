@@ -3,7 +3,7 @@
     "id": "u001",
     "name": "Juan Dela Cruz",
     "section": "12-STEM A",
-    "points": 164,
+    "points": 179,
     "level": 2,
     "badges": [
       "fast_learner",
@@ -15,8 +15,8 @@
     "id": "u002",
     "name": "Maria Santos",
     "section": "12-STEM A",
-    "points": 40,
-    "level": 1,
+    "points": 100,
+    "level": 2,
     "badges": [],
     "dateCreated": "2026-09-01T08:05:00.000Z"
   }

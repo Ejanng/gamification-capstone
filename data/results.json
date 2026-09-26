@@ -74,5 +74,111 @@
       }
     ],
     "timestamp": "2026-09-26T18:56:49.343Z"
+  },
+  {
+    "id": "r_1790450371868",
+    "userId": "u002",
+    "quizId": "q001",
+    "score": 30,
+    "totalPossible": 20,
+    "correctCount": 2,
+    "incorrectCount": 0,
+    "timeTakenSeconds": 4,
+    "pointsEarned": 30,
+    "answers": [
+      {
+        "questionId": "q001_1",
+        "selectedIndex": 1,
+        "isCorrect": true,
+        "pointsEarned": 15
+      },
+      {
+        "questionId": "q001_2",
+        "selectedIndex": 0,
+        "isCorrect": true,
+        "pointsEarned": 15
+      }
+    ],
+    "timestamp": "2026-09-26T19:19:31.868Z"
+  },
+  {
+    "id": "r_1790450491647",
+    "userId": "u001",
+    "quizId": "q_1790450470008",
+    "quiz_type": "gamified",
+    "score": 0,
+    "totalPossible": 20,
+    "correctCount": 0,
+    "incorrectCount": 2,
+    "timeTakenSeconds": 3,
+    "pointsEarned": 0,
+    "answers": [
+      {
+        "questionId": "q_1790450470008_1",
+        "selectedIndex": 1,
+        "isCorrect": false,
+        "pointsEarned": 0
+      },
+      {
+        "questionId": "q_1790450470008_2",
+        "selectedIndex": 2,
+        "isCorrect": false,
+        "pointsEarned": 0
+      }
+    ],
+    "timestamp": "2026-09-26T19:21:31.647Z"
+  },
+  {
+    "id": "r_1790450514153",
+    "userId": "u002",
+    "quizId": "q_1790450470008",
+    "quiz_type": "gamified",
+    "score": 30,
+    "totalPossible": 20,
+    "correctCount": 2,
+    "incorrectCount": 0,
+    "timeTakenSeconds": 3,
+    "pointsEarned": 30,
+    "answers": [
+      {
+        "questionId": "q_1790450470008_1",
+        "selectedIndex": 0,
+        "isCorrect": true,
+        "pointsEarned": 15
+      },
+      {
+        "questionId": "q_1790450470008_2",
+        "selectedIndex": 0,
+        "isCorrect": true,
+        "pointsEarned": 15
+      }
+    ],
+    "timestamp": "2026-09-26T19:21:54.153Z"
+  },
+  {
+    "id": "r_1790450989274",
+    "userId": "u001",
+    "quizId": "q001",
+    "score": 15,
+    "totalPossible": 20,
+    "correctCount": 1,
+    "incorrectCount": 1,
+    "timeTakenSeconds": 4,
+    "pointsEarned": 15,
+    "answers": [
+      {
+        "questionId": "q001_1",
+        "selectedIndex": null,
+        "isCorrect": false,
+        "pointsEarned": 0
+      },
+      {
+        "questionId": "q001_2",
+        "selectedIndex": 0,
+        "isCorrect": true,
+        "pointsEarned": 15
+      }
+    ],
+    "timestamp": "2026-09-26T19:29:49.274Z"
   }
 ]

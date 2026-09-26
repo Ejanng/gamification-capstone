@@ -9,15 +9,57 @@
       {
         "id": "q001_1",
         "prompt": "What gas do plants absorb during photosynthesis?",
-        "options": ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
+        "options": [
+          "Oxygen",
+          "Carbon Dioxide",
+          "Nitrogen",
+          "Hydrogen"
+        ],
         "correctAnswerIndex": 1
       },
       {
         "id": "q001_2",
         "prompt": "What is the primary pigment involved in photosynthesis?",
-        "options": ["Chlorophyll", "Melanin", "Hemoglobin", "Carotene"],
+        "options": [
+          "Chlorophyll",
+          "Melanin",
+          "Hemoglobin",
+          "Carotene"
+        ],
         "correctAnswerIndex": 0
       }
     ]
+  },
+  {
+    "title": "Test",
+    "subject": "debug",
+    "timeLimitSeconds": 300,
+    "quizType": "gamified",
+    "pointsPerCorrect": 10,
+    "questions": [
+      {
+        "id": "q_1790450470008_1",
+        "prompt": "Hello world",
+        "options": [
+          "A",
+          "V",
+          "B",
+          "B"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "id": "q_1790450470008_2",
+        "prompt": "Hello world",
+        "options": [
+          "TEst",
+          "Test",
+          "Test",
+          "Test"
+        ],
+        "correctAnswerIndex": 0
+      }
+    ],
+    "id": "q_1790450470008"
   }
 ]
