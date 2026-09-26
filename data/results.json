@@ -10,9 +10,69 @@
     "timeTakenSeconds": 187,
     "pointsEarned": 10,
     "answers": [
-      { "questionId": "q001_1", "selectedIndex": 1, "isCorrect": true },
-      { "questionId": "q001_2", "selectedIndex": 2, "isCorrect": false }
+      {
+        "questionId": "q001_1",
+        "selectedIndex": 1,
+        "isCorrect": true
+      },
+      {
+        "questionId": "q001_2",
+        "selectedIndex": 2,
+        "isCorrect": false
+      }
     ],
     "timestamp": "2026-09-15T09:30:00.000Z"
+  },
+  {
+    "id": "r_1790448928910",
+    "userId": "u001",
+    "quizId": "q001",
+    "score": 0,
+    "totalPossible": 20,
+    "correctCount": 0,
+    "incorrectCount": 2,
+    "timeTakenSeconds": 7,
+    "pointsEarned": 0,
+    "answers": [
+      {
+        "questionId": "q001_1",
+        "selectedIndex": 0,
+        "isCorrect": false,
+        "pointsEarned": 0
+      },
+      {
+        "questionId": "q001_2",
+        "selectedIndex": 1,
+        "isCorrect": false,
+        "pointsEarned": 0
+      }
+    ],
+    "timestamp": "2026-09-26T18:55:28.910Z"
+  },
+  {
+    "id": "r_1790449009343",
+    "userId": "u001",
+    "quizId": "q001",
+    "score": 14,
+    "totalPossible": 20,
+    "correctCount": 1,
+    "incorrectCount": 1,
+    "timeTakenSeconds": 4,
+    "pointsEarned": 14,
+    "answers": [
+      {
+        "questionId": "q001_1",
+        "selectedIndex": 1,
+        "isCorrect": true,
+        "pointsEarned": 14
+      },
+      {
+        "questionId": "q001_2",
+        "selectedIndex": 1,
+        "isCorrect": false,
+        "pointsEarned": 0
+      }
+    ],
+    "timestamp": "2026-09-26T18:56:49.343Z"
   }
 ]

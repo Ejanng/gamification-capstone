@@ -3,9 +3,12 @@
     "id": "u001",
     "name": "Juan Dela Cruz",
     "section": "12-STEM A",
-    "points": 150,
+    "points": 164,
     "level": 2,
-    "badges": ["fast_learner", "quiz_streak_3"],
+    "badges": [
+      "fast_learner",
+      "quiz_streak_3"
+    ],
     "dateCreated": "2026-09-01T08:00:00.000Z"
   },
   {

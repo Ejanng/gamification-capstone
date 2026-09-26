@@ -3,9 +3,28 @@
 // ============================================================
 const API_BASE = '/api'; // same-origin since Express serves /public via express.static
 
-// Placeholder until you build real auth — swap this for a proper
-// login/session value in a later phase.
-const CURRENT_USER_ID = 'u001';
+// ---------- Session (set by student-login.html) ----------
+function getSession() {
+  const raw = localStorage.getItem('session');
+  if (!raw) return null;
+  try {
+    const session = JSON.parse(raw);
+    return session.role === 'student' ? session : null;
+  } catch {
+    return null;
+  }
+}
+
+const session = getSession();
+if (!session) {
+  window.location.href = 'student-login.html';
+}
+
+const CURRENT_USER_ID = session ? session.id : null;
+
+// ---------- Which quiz to load, from ?quizId=... in the URL ----------
+const urlParams = new URLSearchParams(window.location.search);
+const REQUESTED_QUIZ_ID = urlParams.get('quizId');
 
 // How much of a question's base points can be earned as a time bonus.
 // 0.5 = up to +50% bonus for answering instantly, tapering to 0 at the deadline.
@@ -90,7 +109,7 @@ async function init() {
   try {
     const [user, quiz] = await Promise.all([
       fetchCurrentUser(),
-      fetchFirstQuiz()
+      fetchRequestedQuiz()
     ]);
 
     state.user = user;
@@ -127,12 +146,19 @@ async function fetchCurrentUser() {
   return user;
 }
 
-async function fetchFirstQuiz() {
+async function fetchRequestedQuiz() {
   const res = await fetch(`${API_BASE}/quizzes`);
   if (!res.ok) throw new Error('Failed to fetch quizzes.json');
   const quizzes = await res.json();
   if (!quizzes.length) throw new Error('No quizzes available');
-  return quizzes[0]; // Phase-4 TODO: let the student pick from a list instead
+
+  if (REQUESTED_QUIZ_ID) {
+    const match = quizzes.find(q => q.id === REQUESTED_QUIZ_ID);
+    if (!match) throw new Error(`Quiz ${REQUESTED_QUIZ_ID} not found`);
+    return match;
+  }
+
+  return quizzes[0]; // fallback if this page was opened with no ?quizId=
 }
 
 async function fetchAllUsers() {
@@ -351,6 +377,10 @@ async function finishQuiz() {
       renderHUD();
       await renderLeaderboard();
     }
+
+    setTimeout(() => {
+      window.location.href = 'student-dashboard.html';
+    }, 2500);
 
   } catch (err) {
     console.error('Failed to save quiz results:', err);

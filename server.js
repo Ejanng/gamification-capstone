@@ -79,11 +79,80 @@ function registerRoutes(resourceName, filename) {
       res.status(500).json({ error: err.message });
     }
   });
+
+  // PATCH /api/users/:id -> updates one record by id, merging in whatever fields are sent.
+  app.patch(`/api/${resourceName}/:id`, (req, res) => {
+    try {
+      const data = readJSON(filename);
+      const index = data.findIndex(record => record.id === req.params.id);
+      if (index === -1) {
+        return res.status(404).json({ error: `${resourceName} record ${req.params.id} not found` });
+      }
+      data[index] = { ...data[index], ...req.body, id: data[index].id };
+      writeJSON(filename, data);
+      res.json({ message: `${resourceName} record updated`, record: data[index] });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // DELETE /api/users/:id -> removes one record by id.
+  app.delete(`/api/${resourceName}/:id`, (req, res) => {
+    try {
+      const data = readJSON(filename);
+      const index = data.findIndex(record => record.id === req.params.id);
+      if (index === -1) {
+        return res.status(404).json({ error: `${resourceName} record ${req.params.id} not found` });
+      }
+      const [removed] = data.splice(index, 1);
+      writeJSON(filename, data);
+      res.json({ message: `${resourceName} record deleted`, record: removed });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 }
 
 registerRoutes('users', 'users.json');
 registerRoutes('quizzes', 'quizzes.json');
 registerRoutes('results', 'results.json');
+registerRoutes('teachers', 'teachers.json');
+
+// ---------- Auth (simple, capstone-scope only — NOT production security) ----------
+// Students "log in" by picking their existing record from users.json; no password.
+app.post('/api/auth/student-login', (req, res) => {
+  try {
+    const { studentId } = req.body;
+    if (!studentId) return res.status(400).json({ error: 'studentId is required' });
+
+    const users = readJSON('users.json');
+    const user = users.find(u => u.id === studentId);
+    if (!user) return res.status(404).json({ error: 'Student not found' });
+
+    res.json({ id: user.id, name: user.name, section: user.section || null, role: 'student' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Teachers log in with a username + password checked against teachers.json (plain text —
+// fine for a local capstone demo, do NOT reuse this pattern for anything real).
+app.post('/api/auth/teacher-login', (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'username and password are required' });
+    }
+
+    const teachers = readJSON('teachers.json');
+    const teacher = teachers.find(t => t.username === username && t.password === password);
+    if (!teacher) return res.status(401).json({ error: 'Invalid username or password' });
+
+    res.json({ id: teacher.id, name: teacher.name, username: teacher.username, role: 'teacher' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // ---------- Start server ----------
 app.listen(PORT, () => {

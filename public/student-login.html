@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F7FB; --surface:#FFFFFF; --ink:#1B1D2A; --ink-muted:#5A5D74;
+    --indigo:#3A3D8F; --indigo-dark:#2B2E6E; --gold:#F5A623;
+    --border:#E1E2EC; --red:#D64545; --radius-sm:6px; --radius-lg:14px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:var(--bg); color:var(--ink); font-family:'Inter', system-ui, sans-serif; }
+  body{ display:flex; align-items:center; justify-content:center; padding:24px; }
+  main{ width:100%; max-width:380px; }
+  a.back-link{ display:inline-block; margin-bottom:18px; font-size:13px; color:var(--ink-muted); text-decoration:none; }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size:21px; font-weight:600; margin:0 0 4px; }
+  p.subtitle{ color:var(--ink-muted); font-size:13.5px; margin:0 0 24px; }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:24px; }
+  .field-group{ display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+  .field-group label{ font-size:12.5px; font-weight:600; color:var(--ink-muted); }
+  select, input[type="text"]{
+    border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:10px 12px; font-family:inherit; font-size:14px; color:var(--ink); background:#fff; width:100%;
+  }
+  select:focus, input:focus{ outline:2px solid var(--indigo); outline-offset:1px; border-color:var(--indigo); }
+  button{
+    width:100%; font-family:inherit; font-size:14px; font-weight:600;
+    border-radius:var(--radius-sm); padding:11px 16px; border:none;
+    background:var(--indigo); color:#fff; cursor:pointer;
+  }
+  button:hover{ background:var(--indigo-dark); }
+  button:disabled{ background:#B9BBDA; cursor:not-allowed; }
+  #login-error{ color:var(--red); font-size:12.5px; min-height:16px; margin-top:10px; }
+</style>
+</head>
+<body>
+<main>
+  <a href="index.html" class="back-link">&larr; Back</a>
+  <h1>Student Login</h1>
+  <p class="subtitle">Select your name from the class roster to continue.</p>
+
+  <div class="card">
+    <form id="student-login-form" autocomplete="off">
+      <div class="field-group">
+        <label for="student-select">Your name</label>
+        <select id="student-select" required>
+          <option value="" disabled selected>Loading roster...</option>
+        </select>
+      </div>
+      <button type="submit" id="student-login-btn">Log in</button>
+      <div id="login-error"></div>
+    </form>
+  </div>
+</main>
+
+<script>
+const API_BASE = '/api';
+const select = document.getElementById('student-select');
+const form = document.getElementById('student-login-form');
+const loginBtn = document.getElementById('student-login-btn');
+const errorEl = document.getElementById('login-error');
+
+async function loadRoster() {
+  try {
+    const res = await fetch(`${API_BASE}/users`);
+    if (!res.ok) throw new Error('Failed to load roster');
+    const users = await res.json();
+
+    select.innerHTML = '<option value="" disabled selected>Choose your name...</option>';
+    users.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.id;
+      opt.textContent = u.section ? `${u.name} (${u.section})` : u.name;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    select.innerHTML = '<option value="" disabled selected>Could not load roster</option>';
+    errorEl.textContent = 'Could not reach the server. Is it running?';
+  }
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorEl.textContent = '';
+  const studentId = select.value;
+  if (!studentId) return;
+
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Logging in...';
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/student-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ studentId })
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || 'Login failed');
+    }
+    const session = await res.json();
+    localStorage.setItem('session', JSON.stringify(session));
+    window.location.href = 'student-dashboard.html';
+  } catch (err) {
+    errorEl.textContent = err.message;
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Log in';
+  }
+});
+
+loadRoster();
+</script>
+</body>
+</html>

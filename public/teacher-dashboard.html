@@ -16,6 +16,7 @@
     --indigo-dark:#2B2E6E;
     --gold:#F5A623;
     --teal:#2BB673;
+    --red:#D64545;
     --border:#E1E2EC;
     --radius-sm:6px;
     --radius-md:10px;
@@ -320,6 +321,63 @@
     background:var(--teal);
   }
 
+  /* ---------- Quiz List ---------- */
+  #quiz-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .quiz-list-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 14px;
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    flex-wrap:wrap;
+  }
+
+  .quiz-list-item-info{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+
+  .quiz-list-item-title{
+    font-size:14px;
+    font-weight:600;
+  }
+
+  .quiz-list-item-meta{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    font-size:12px;
+    color:var(--ink-muted);
+    flex-wrap:wrap;
+  }
+
+  .quiz-list-item-actions{
+    display:flex;
+    gap:8px;
+  }
+
+  .btn-sm{
+    padding:6px 12px;
+    font-size:12.5px;
+  }
+
+  .btn-danger{
+    background:#fff;
+    color:var(--red, #D64545);
+    border-color:#D64545;
+  }
+  .btn-danger:hover{
+    background:#FBEAEA;
+  }
+
   .empty-state{
     padding:36px 16px;
     text-align:center;
@@ -335,7 +393,10 @@
     <h1>Quiz &amp; Progress Control</h1>
     <div class="header-sub">Gamification &amp; Academic Performance — Capstone Dashboard</div>
   </div>
-  <div class="teacher-badge" id="teacher-identity">Teacher view</div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <div class="teacher-badge" id="teacher-identity">Teacher view</div>
+    <button type="button" class="btn btn-secondary" id="logout-btn" style="background:transparent; border-color:rgba(255,255,255,0.4); color:#fff;">Log out</button>
+  </div>
 </header>
 
 <main class="dashboard-layout">
@@ -415,6 +476,17 @@
     </form>
   </section>
 
+  <!-- ================= QUIZ LIST ================= -->
+  <section class="panel" id="quiz-list-panel">
+    <h2>Quizzes &amp; Activities</h2>
+    <p class="panel-desc">Everything saved to <code>quizzes.json</code>. Edit loads it back into the form on the left; Delete removes it permanently.</p>
+
+    <div id="quiz-list-container">
+      <p id="quiz-list-empty" style="display:none; color:var(--ink-muted); font-size:13.5px;">No quizzes yet — create one on the left.</p>
+      <div id="quiz-list"></div>
+    </div>
+  </section>
+
   <!-- ================= STUDENT PROGRESS ================= -->
   <section class="panel" id="student-progress-panel">
     <h2>Student Progress</h2>
@@ -460,5 +532,6 @@
 
 </main>
 
+<script src="teacher.js"></script>
 </body>
 </html>
