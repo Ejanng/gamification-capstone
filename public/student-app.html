@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student App — Gamification Capstone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F7FB;
+    --surface:#FFFFFF;
+    --ink:#1B1D2A;
+    --ink-muted:#5A5D74;
+    --indigo:#3A3D8F;
+    --indigo-dark:#2B2E6E;
+    --gold:#F5A623;
+    --gold-soft:#FDECC8;
+    --teal:#2BB673;
+    --red:#D64545;
+    --border:#E1E2EC;
+    --radius-sm:6px;
+    --radius-md:10px;
+    --radius-lg:14px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:15px;
+    line-height:1.5;
+  }
+
+  h1,h2,h3{
+    font-family:'Space Grotesk', sans-serif;
+    margin:0;
+    color:var(--ink);
+  }
+
+  /* ================= HUD ================= */
+  header#gamification-hud{
+    background:var(--indigo);
+    color:#fff;
+    padding:20px 32px;
+    display:flex;
+    align-items:center;
+    gap:32px;
+    flex-wrap:wrap;
+  }
+
+  .hud-identity{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:160px;
+  }
+
+  .hud-identity .hud-label{
+    font-size:11.5px;
+    color:#C7C9E8;
+    font-weight:500;
+  }
+
+  #student-name-display{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:19px;
+    font-weight:600;
+  }
+
+  .hud-stat{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:90px;
+  }
+
+  .hud-stat .hud-label{
+    font-size:11.5px;
+    color:#C7C9E8;
+    font-weight:500;
+  }
+
+  .hud-stat-value{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:22px;
+    font-weight:700;
+  }
+
+  #current-level-display{
+    color:#fff;
+  }
+
+  #total-points-display{
+    color:var(--gold);
+  }
+
+  .hud-progress-block{
+    flex:1;
+    min-width:220px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  .hud-progress-labels{
+    display:flex;
+    justify-content:space-between;
+    font-size:11.5px;
+    color:#C7C9E8;
+  }
+
+  #progress-bar-track{
+    width:100%;
+    height:10px;
+    background:rgba(255,255,255,0.15);
+    border-radius:6px;
+    overflow:hidden;
+  }
+
+  #progress-bar-fill{
+    height:100%;
+    width:40%; /* JS updates this in Phase 3 */
+    background:var(--gold);
+    border-radius:6px;
+    transition:width 0.4s ease;
+  }
+
+  /* ================= LAYOUT ================= */
+  main#app-layout{
+    display:grid;
+    grid-template-columns:1fr 320px;
+    gap:24px;
+    padding:28px 32px 48px;
+    max-width:1400px;
+    margin:0 auto;
+    align-items:start;
+  }
+
+  @media (max-width:880px){
+    main#app-layout{
+      grid-template-columns:1fr;
+    }
+  }
+
+  section.panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:22px;
+  }
+
+  /* ================= QUIZ CONTAINER ================= */
+  #quiz-container{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  #quiz-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  #quiz-title-display{
+    font-size:19px;
+    font-weight:600;
+  }
+
+  #quiz-timer-display{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:15px;
+    font-weight:600;
+    color:var(--indigo);
+    background:#EFF0FA;
+    padding:5px 12px;
+    border-radius:20px;
+  }
+
+  #question-progress-track{
+    width:100%;
+    height:6px;
+    background:#EAEAF2;
+    border-radius:4px;
+    overflow:hidden;
+  }
+
+  #question-progress-fill{
+    height:100%;
+    width:20%;
+    background:var(--indigo);
+    border-radius:4px;
+  }
+
+  #question-prompt-display{
+    font-size:17px;
+    font-weight:600;
+    margin-top:4px;
+  }
+
+  #choices-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .choice-option{
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:13px 16px;
+    cursor:pointer;
+    font-size:14.5px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#fff;
+  }
+
+  .choice-option:hover{
+    border-color:var(--indigo);
+    background:#FAFAFD;
+  }
+
+  .choice-option.is-selected{
+    border-color:var(--indigo);
+    background:#EFF0FA;
+  }
+
+  .choice-option.is-correct{
+    border-color:var(--teal);
+    background:#E8F8F0;
+  }
+
+  .choice-option.is-incorrect{
+    border-color:var(--red);
+    background:#FBEAEA;
+  }
+
+  .choice-marker{
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    border:1.5px solid var(--border);
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-muted);
+  }
+
+  #quiz-actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:4px;
+  }
+
+  #quiz-feedback{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--teal);
+    min-height:18px;
+  }
+
+  .btn{
+    font-family:inherit;
+    font-size:13.5px;
+    font-weight:600;
+    border-radius:var(--radius-sm);
+    padding:10px 20px;
+    border:1px solid transparent;
+    cursor:pointer;
+  }
+
+  .btn-primary{
+    background:var(--indigo);
+    color:#fff;
+  }
+  .btn-primary:hover{ background:var(--indigo-dark); }
+
+  .btn-primary:disabled{
+    background:#B9BBDA;
+    cursor:not-allowed;
+  }
+
+  /* ================= LEADERBOARD ================= */
+  #leaderboard-panel h2{
+    font-size:16px;
+    font-weight:600;
+    margin-bottom:2px;
+  }
+
+  .panel-desc{
+    font-size:12.5px;
+    color:var(--ink-muted);
+    margin-bottom:16px;
+  }
+
+  #leaderboard-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .leaderboard-entry{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:var(--radius-sm);
+    border:1px solid var(--border);
+  }
+
+  .leaderboard-entry.is-current-user{
+    border-color:var(--gold);
+    background:var(--gold-soft);
+  }
+
+  .leaderboard-rank{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:var(--indigo);
+    width:20px;
+    flex-shrink:0;
+  }
+
+  .leaderboard-name{
+    flex:1;
+    font-size:13.5px;
+    font-weight:500;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  .leaderboard-points{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--gold);
+  }
+
+  #leaderboard-updated-at{
+    font-size:11px;
+    color:var(--ink-muted);
+    margin-top:14px;
+    text-align:right;
+  }
+</style>
+</head>
+<body>
+
+<header id="gamification-hud">
+  <div class="hud-identity">
+    <span class="hud-label">Student</span>
+    <span id="student-name-display">Juan Dela Cruz</span>
+  </div>
+
+  <div class="hud-stat">
+    <span class="hud-label">Level</span>
+    <span class="hud-stat-value" id="current-level-display">2</span>
+  </div>
+
+  <div class="hud-stat">
+    <span class="hud-label">Total points</span>
+    <span class="hud-stat-value" id="total-points-display">150</span>
+  </div>
+
+  <div class="hud-progress-block">
+    <div class="hud-progress-labels">
+      <span>Progress to Level 3</span>
+      <span id="progress-bar-label">150 / 375 XP</span>
+    </div>
+    <div id="progress-bar-track">
+      <div id="progress-bar-fill"></div>
+    </div>
+  </div>
+</header>
+
+<main id="app-layout">
+
+  <!-- ================= QUIZ ================= -->
+  <section class="panel" id="quiz-panel">
+    <div id="quiz-container">
+
+      <div id="quiz-header">
+        <span id="quiz-title-display">Photosynthesis Basics</span>
+        <span id="quiz-timer-display">04:52</span>
+      </div>
+
+      <div id="question-progress-track">
+        <div id="question-progress-fill"></div>
+      </div>
+
+      <div id="question-block">
+        <p id="question-prompt-display">What gas do plants absorb during photosynthesis?</p>
+
+        <ul id="choices-list">
+          <li class="choice-option" data-choice-index="0">
+            <span class="choice-marker">A</span>
+            <span class="choice-text">Oxygen</span>
+          </li>
+          <li class="choice-option" data-choice-index="1">
+            <span class="choice-marker">B</span>
+            <span class="choice-text">Carbon Dioxide</span>
+          </li>
+          <li class="choice-option" data-choice-index="2">
+            <span class="choice-marker">C</span>
+            <span class="choice-text">Nitrogen</span>
+          </li>
+          <li class="choice-option" data-choice-index="3">
+            <span class="choice-marker">D</span>
+            <span class="choice-text">Hydrogen</span>
+          </li>
+        </ul>
+      </div>
+
+      <div id="quiz-actions">
+        <span id="quiz-feedback"></span>
+        <button type="button" class="btn btn-primary" id="submit-answer-btn">Submit answer</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LEADERBOARD ================= -->
+  <aside class="panel" id="leaderboard-panel">
+    <h2>Leaderboard</h2>
+    <p class="panel-desc">Live ranking by total points.</p>
+
+    <ol id="leaderboard-list">
+      <li class="leaderboard-entry is-current-user" data-user-id="u001">
+        <span class="leaderboard-rank">1</span>
+        <span class="leaderboard-name">Juan Dela Cruz</span>
+        <span class="leaderboard-points">150</span>
+      </li>
+      <li class="leaderboard-entry" data-user-id="u003">
+        <span class="leaderboard-rank">2</span>
+        <span class="leaderboard-name">Ana Reyes</span>
+        <span class="leaderboard-points">120</span>
+      </li>
+      <li class="leaderboard-entry" data-user-id="u002">
+        <span class="leaderboard-rank">3</span>
+        <span class="leaderboard-name">Maria Santos</span>
+        <span class="leaderboard-points">40</span>
+      </li>
+    </ol>
+
+    <div id="leaderboard-updated-at">Updated just now</div>
+  </aside>
+
+</main>
+<script src="app.js"></script>
+</body>
+</html>

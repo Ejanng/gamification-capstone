@@ -1,0 +1,18 @@
+[
+  {
+    "id": "r001",
+    "userId": "u001",
+    "quizId": "q001",
+    "score": 8,
+    "totalPossible": 10,
+    "correctCount": 1,
+    "incorrectCount": 1,
+    "timeTakenSeconds": 187,
+    "pointsEarned": 10,
+    "answers": [
+      { "questionId": "q001_1", "selectedIndex": 1, "isCorrect": true },
+      { "questionId": "q001_2", "selectedIndex": 2, "isCorrect": false }
+    ],
+    "timestamp": "2026-09-15T09:30:00.000Z"
+  }
+]

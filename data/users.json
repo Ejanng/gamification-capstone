@@ -1,0 +1,20 @@
+[
+  {
+    "id": "u001",
+    "name": "Juan Dela Cruz",
+    "section": "12-STEM A",
+    "points": 150,
+    "level": 2,
+    "badges": ["fast_learner", "quiz_streak_3"],
+    "dateCreated": "2026-09-01T08:00:00.000Z"
+  },
+  {
+    "id": "u002",
+    "name": "Maria Santos",
+    "section": "12-STEM A",
+    "points": 40,
+    "level": 1,
+    "badges": [],
+    "dateCreated": "2026-09-01T08:05:00.000Z"
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "q001",
+    "title": "Photosynthesis Basics",
+    "subject": "Biology",
+    "pointsPerCorrect": 10,
+    "timeLimitSeconds": 300,
+    "questions": [
+      {
+        "id": "q001_1",
+        "prompt": "What gas do plants absorb during photosynthesis?",
+        "options": ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
+        "correctAnswerIndex": 1
+      },
+      {
+        "id": "q001_2",
+        "prompt": "What is the primary pigment involved in photosynthesis?",
+        "options": ["Chlorophyll", "Melanin", "Hemoglobin", "Carotene"],
+        "correctAnswerIndex": 0
+      }
+    ]
+  }
+]
