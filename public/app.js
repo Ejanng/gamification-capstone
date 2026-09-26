@@ -34,10 +34,10 @@ const state = {
 // ============================================================
 // DOM REFERENCES
 // ============================================================
-dom.hud = document.getElementById('gamification-hud');
-dom.leaderboardPanel = document.getElementById('leaderboard-panel');
-
 const dom = {
+  hud: document.getElementById('gamification-hud'),
+  leaderboardPanel: document.getElementById('leaderboard-panel'),
+
   studentName: document.getElementById('student-name-display'),
   currentLevel: document.getElementById('current-level-display'),
   totalPoints: document.getElementById('total-points-display'),
@@ -242,6 +242,8 @@ function updateTimerDisplay() {
 // ============================================================
 // SUBMIT ANSWER  (updated — skip visible point popups during test mode)
 // ============================================================
+dom.submitBtn.addEventListener('click', submitAnswer);
+
 async function submitAnswer() {
   if (state.answered) return;
   state.answered = true;

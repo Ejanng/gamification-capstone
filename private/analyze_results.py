@@ -227,3 +227,34 @@ def print_report(cohort_label: str, summary: pd.DataFrame,
 # ============================================================
 # MAIN
 # ============================================
+
+def main():
+    users, results = load_dataframes()
+    summary = build_student_summary(users, results)
+
+    if len(summary) < 2:
+        sys.exit("ERROR: Need at least 2 students with complete Pre/Post-Test pairs "
+                  "to run a paired t-test.")
+
+    grade_11_summary = filter_grade_11(summary)
+    cohort_label = "Grade 11 Cohort" if "section" in summary.columns else "All Students"
+
+    if len(grade_11_summary) < 2:
+        sys.exit("ERROR: Fewer than 2 Grade 11 students have complete Pre/Post-Test "
+                  "pairs -- cannot run a paired t-test on this cohort.")
+
+    t_stat, t_p = run_paired_ttest(
+        grade_11_summary["pre_test_score"],
+        grade_11_summary["post_test_score"]
+    )
+
+    r_val, r_p = run_pearson_correlation(
+        summary["points"],
+        summary["improvement"]
+    )
+
+    print_report(cohort_label, grade_11_summary, t_stat, t_p, r_val, r_p)
+
+
+if __name__ == "__main__":
+    main()
