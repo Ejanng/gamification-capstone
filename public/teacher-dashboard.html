@@ -598,6 +598,28 @@
     </div>
   </section>
 
+  <!-- ================= REDEMPTION HISTORY ================= -->
+  <section class="panel" id="redemption-history-panel">
+    <h2>Redemption History</h2>
+    <p class="panel-desc">Audit trail from <code>redemptions.json</code> — check this against what's physically handed out.</p>
+
+    <div class="table-scroll">
+      <table id="redemption-history-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Reward</th>
+            <th>Points spent</th>
+            <th>Remaining points</th>
+            <th>When</th>
+          </tr>
+        </thead>
+        <tbody id="redemption-history-tbody"></tbody>
+      </table>
+    </div>
+    <p id="redemption-history-empty" style="display:none; color:var(--ink-muted); font-size:13.5px; padding:16px 0;">No redemptions yet.</p>
+  </section>
+
 </main>
 
 <script src="teacher.js"></script>

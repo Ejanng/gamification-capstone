@@ -22,6 +22,7 @@
   }
   header.app-header h1{ font-size:19px; font-weight:600; }
   #welcome-text{ font-size:12.5px; color:#C7C9E8; margin-top:2px; }
+  #points-display{ font-size:12.5px; color:var(--gold); font-weight:600; margin-top:2px; }
   #logout-btn{
     background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25);
     color:#fff; font-family:inherit; font-size:13px; font-weight:500;
@@ -139,6 +140,21 @@
   .reward-card-cost{ font-size:12px; color:var(--ink-muted); }
   .reward-card-status{ font-size:11px; font-weight:600; margin-top:2px; }
 
+  .redeem-btn{
+    margin-top:4px;
+    font-family:inherit;
+    font-size:12px;
+    font-weight:600;
+    border:none;
+    border-radius:6px;
+    padding:7px 16px;
+    cursor:pointer;
+    background:var(--indigo);
+    color:#fff;
+  }
+  .redeem-btn:hover{ background:var(--indigo-dark); }
+  .redeem-btn:disabled{ background:#B9BBDA; cursor:not-allowed; }
+
   /* Locked state — greyed out, padlock */
   .reward-card.locked{
     background:#F1F1F4;
@@ -183,6 +199,7 @@
   <div>
     <h1>My Quizzes</h1>
     <div id="welcome-text">Loading...</div>
+    <div id="points-display"></div>
   </div>
   <button id="logout-btn">Log out</button>
 </header>
@@ -239,6 +256,11 @@ const quizTypeLabels = {
   'gamified': 'Gamified Activity'
 };
 
+// Mutable local copy of the student's points, kept in sync with the server
+// after each redemption so the catalog re-locks/unlocks without a full reload.
+let currentPoints = 0;
+let rewardsCache = [];
+
 async function loadDashboard() {
   document.getElementById('welcome-text').textContent = `Signed in as ${session.name}`;
 
@@ -269,13 +291,21 @@ async function loadDashboard() {
     );
 
     const currentUser = users.find(u => u.id === session.id);
-    renderRewardsCatalog(rewards, currentUser ? (currentUser.points || 0) : 0, inTestMode);
+    currentPoints = currentUser ? (currentUser.points || 0) : 0;
+    rewardsCache = rewards;
+
+    updatePointsDisplay();
+    renderRewardsCatalog(inTestMode);
 
   } catch (err) {
     console.error('Failed to load dashboard:', err);
     document.getElementById('quiz-list').innerHTML =
       '<div id="empty-state">Could not load quizzes. Is the server running?</div>';
   }
+}
+
+function updatePointsDisplay() {
+  document.getElementById('points-display').textContent = `${currentPoints} points available`;
 }
 
 function renderRewardIcon(iconValue) {
@@ -285,39 +315,92 @@ function renderRewardIcon(iconValue) {
     : (iconValue || '🎁');
 }
 
-function renderRewardsCatalog(rewards, currentPoints, inTestMode) {
+let dashboardInTestMode = false;
+
+function renderRewardsCatalog(inTestMode) {
+  if (typeof inTestMode === 'boolean') dashboardInTestMode = inTestMode;
+
   const section = document.getElementById('rewards-catalog-section');
   const grid = document.getElementById('rewards-grid');
 
-  if (inTestMode) {
+  if (dashboardInTestMode) {
     section.style.display = 'none';
     return;
   }
   section.style.display = '';
 
-  if (!rewards.length) {
+  if (!rewardsCache.length) {
     grid.innerHTML = '<p style="color:var(--ink-muted); font-size:13.5px;">No rewards have been added yet.</p>';
     return;
   }
 
   grid.innerHTML = '';
-  rewards.forEach(reward => {
-    const isUnlocked = currentPoints >= reward.point_cost;
+  rewardsCache.forEach(reward => {
+    const canAfford = currentPoints >= reward.point_cost;
 
     const card = document.createElement('div');
-    card.className = `reward-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+    card.className = `reward-card ${canAfford ? 'unlocked' : 'locked'}`;
     card.dataset.rewardId = reward.id;
 
     card.innerHTML = `
       <div class="reward-card-icon">${renderRewardIcon(reward.icon_url)}</div>
       <div class="reward-card-name"></div>
       <div class="reward-card-cost">${reward.point_cost} pts</div>
-      <div class="reward-card-status">${isUnlocked ? 'Unlocked — show your teacher' : `${reward.point_cost - currentPoints} more points needed`}</div>
+      <div class="reward-card-status">${canAfford ? 'Ready to redeem' : `${reward.point_cost - currentPoints} more points needed`}</div>
     `;
     card.querySelector('.reward-card-name').textContent = reward.reward_name;
 
+    if (canAfford) {
+      const redeemBtn = document.createElement('button');
+      redeemBtn.type = 'button';
+      redeemBtn.className = 'redeem-btn';
+      redeemBtn.textContent = 'Redeem';
+      redeemBtn.addEventListener('click', () => handleRedeem(reward, redeemBtn));
+      card.appendChild(redeemBtn);
+    }
+
     grid.appendChild(card);
   });
+}
+
+async function handleRedeem(reward, buttonEl) {
+  const confirmed = confirm(
+    `Redeem "${reward.reward_name}" for ${reward.point_cost} points?\n\n` +
+    `This will deduct ${reward.point_cost} points from your account. Show this ` +
+    `confirmation to your teacher to collect the item.`
+  );
+  if (!confirmed) return;
+
+  buttonEl.disabled = true;
+  buttonEl.textContent = 'Redeeming...';
+
+  try {
+    const res = await fetch(`${API_BASE}/redeem`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: session.id, rewardId: reward.id })
+    });
+    const body = await res.json();
+
+    if (!res.ok) {
+      alert(body.error || 'Could not redeem this reward.');
+      buttonEl.disabled = false;
+      buttonEl.textContent = 'Redeem';
+      return;
+    }
+
+    currentPoints = body.remainingPoints;
+    updatePointsDisplay();
+    renderRewardsCatalog(); // re-render with the new point total (some rewards may now lock)
+
+    alert(`Redeemed "${reward.reward_name}"! Show your teacher to collect it.`);
+
+  } catch (err) {
+    console.error('Redeem failed:', err);
+    alert('Could not reach the server. Please try again.');
+    buttonEl.disabled = false;
+    buttonEl.textContent = 'Redeem';
+  }
 }
 
 function renderLeaderboard(users) {

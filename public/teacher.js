@@ -59,7 +59,10 @@ const dom = {
 
   progressTbody: document.getElementById('student-progress-tbody'),
   searchInput: document.getElementById('student-search-input'),
-  refreshBtn: document.getElementById('refresh-progress-btn')
+  refreshBtn: document.getElementById('refresh-progress-btn'),
+
+  redemptionTbody: document.getElementById('redemption-history-tbody'),
+  redemptionEmpty: document.getElementById('redemption-history-empty')
 };
 
 // ============================================================
@@ -89,6 +92,7 @@ function init() {
   renderQuizList();
   renderRewardList();
   renderStudentProgress();
+  renderRedemptionHistory();
 }
 
 // ============================================================
@@ -513,6 +517,46 @@ async function renderStudentProgress() {
   } catch (err) {
     console.error('Failed to render student progress:', err);
     dom.progressTbody.innerHTML = `<tr><td colspan="7" class="empty-state">Could not load student progress.</td></tr>`;
+  }
+}
+
+// ============================================================
+// REDEMPTION HISTORY
+// ============================================================
+async function renderRedemptionHistory() {
+  try {
+    const res = await fetch(`${API_BASE}/redemptions`);
+    if (!res.ok) throw new Error('Failed to fetch redemptions');
+    const redemptions = await res.json();
+
+    dom.redemptionTbody.innerHTML = '';
+
+    if (!redemptions.length) {
+      dom.redemptionEmpty.style.display = 'block';
+      return;
+    }
+    dom.redemptionEmpty.style.display = 'none';
+
+    // Newest first.
+    const sorted = [...redemptions].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    sorted.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="student-name-cell"></td>
+        <td class="reward-name-cell"></td>
+        <td class="points-cell">-${r.point_cost}</td>
+        <td>${r.remainingPoints}</td>
+        <td>${new Date(r.timestamp).toLocaleString()}</td>
+      `;
+      tr.querySelector('.student-name-cell').textContent = r.studentName || r.userId;
+      tr.querySelector('.reward-name-cell').textContent = r.reward_name;
+      dom.redemptionTbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error('Failed to render redemption history:', err);
+    dom.redemptionTbody.innerHTML = `<tr><td colspan="5" class="empty-state">Could not load redemption history.</td></tr>`;
   }
 }
 

@@ -118,6 +118,61 @@ registerRoutes('quizzes', 'quizzes.json');
 registerRoutes('results', 'results.json');
 registerRoutes('teachers', 'teachers.json');
 registerRoutes('rewards', 'rewards.json');
+registerRoutes('redemptions', 'redemptions.json');
+
+// ---------- Redeem a reward (atomic: deduct points + log the redemption together) ----------
+// Doing this as one dedicated endpoint (rather than the client reading users.json,
+// subtracting locally, then PUTting the whole array back) avoids a race condition
+// where two quick clicks — or two students' requests overlapping — could both read
+// the same "before" points value and only one deduction would stick.
+app.post('/api/redeem', (req, res) => {
+  try {
+    const { userId, rewardId } = req.body;
+    if (!userId || !rewardId) {
+      return res.status(400).json({ error: 'userId and rewardId are required' });
+    }
+
+    const users = readJSON('users.json');
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex === -1) return res.status(404).json({ error: 'Student not found' });
+
+    const rewards = readJSON('rewards.json');
+    const reward = rewards.find(r => r.id === rewardId);
+    if (!reward) return res.status(404).json({ error: 'Reward not found' });
+
+    const user = users[userIndex];
+    if ((user.points || 0) < reward.point_cost) {
+      return res.status(400).json({ error: 'Not enough points to redeem this reward' });
+    }
+
+    // Deduct and persist.
+    user.points = user.points - reward.point_cost;
+    writeJSON('users.json', users);
+
+    // Log the redemption for the teacher's audit trail / physical hand-out record.
+    const redemptions = readJSON('redemptions.json');
+    const redemptionRecord = {
+      id: `rd_${Date.now()}`,
+      userId: user.id,
+      studentName: user.name,
+      rewardId: reward.id,
+      reward_name: reward.reward_name,
+      point_cost: reward.point_cost,
+      remainingPoints: user.points,
+      timestamp: new Date().toISOString()
+    };
+    redemptions.push(redemptionRecord);
+    writeJSON('redemptions.json', redemptions);
+
+    res.status(201).json({
+      message: 'Reward redeemed',
+      remainingPoints: user.points,
+      redemption: redemptionRecord
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // ---------- Auth (simple, capstone-scope only — NOT production security) ----------
 // Students "log in" by picking their existing record from users.json; no password.
