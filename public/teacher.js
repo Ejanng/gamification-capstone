@@ -545,22 +545,89 @@ async function renderRedemptionHistory() {
     const sorted = [...redemptions].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     sorted.forEach(r => {
+      const status = r.status || 'pending'; // older records may predate the status field
+      const isClaimed = status === 'claimed';
+
       const tr = document.createElement('tr');
+      tr.dataset.redemptionId = r.id;
       tr.innerHTML = `
         <td class="student-name-cell"></td>
         <td class="reward-name-cell"></td>
         <td class="points-cell">-${r.point_cost}</td>
         <td>${r.remainingPoints}</td>
         <td>${new Date(r.timestamp).toLocaleString()}</td>
+        <td class="status-cell">
+          <span class="status-pill ${status}">${isClaimed ? 'Claimed' : 'Pending pickup'}</span>
+        </td>
+        <td class="action-cell"></td>
       `;
       tr.querySelector('.student-name-cell').textContent = r.studentName || r.userId;
       tr.querySelector('.reward-name-cell').textContent = r.reward_name;
+
+      const actionCell = tr.querySelector('.action-cell');
+      if (isClaimed) {
+        const claimedLabel = document.createElement('span');
+        claimedLabel.style.cssText = 'font-size:12px; color:var(--ink-muted);';
+        claimedLabel.textContent = r.claimedAt ? `on ${new Date(r.claimedAt).toLocaleDateString()}` : '—';
+        actionCell.appendChild(claimedLabel);
+      } else {
+        const confirmBtn = document.createElement('button');
+        confirmBtn.type = 'button';
+        confirmBtn.className = 'btn btn-sm btn-confirm';
+        confirmBtn.textContent = 'Confirm handed out';
+        confirmBtn.addEventListener('click', () => confirmRedemption(r.id, tr, confirmBtn));
+        actionCell.appendChild(confirmBtn);
+      }
+
       dom.redemptionTbody.appendChild(tr);
     });
 
   } catch (err) {
     console.error('Failed to render redemption history:', err);
-    dom.redemptionTbody.innerHTML = `<tr><td colspan="5" class="empty-state">Could not load redemption history.</td></tr>`;
+    dom.redemptionTbody.innerHTML = `<tr><td colspan="7" class="empty-state">Could not load redemption history.</td></tr>`;
+  }
+}
+
+// Marks a redemption as physically handed out. Uses the existing generic
+// PATCH /api/redemptions/:id route (server.js already registers CRUD routes
+// for 'redemptions'), so no backend change is needed beyond the status field.
+async function confirmRedemption(redemptionId, rowEl, buttonEl) {
+  const confirmed = confirm('Mark this reward as handed out to the student?');
+  if (!confirmed) return;
+
+  buttonEl.disabled = true;
+  buttonEl.textContent = 'Confirming...';
+
+  try {
+    const res = await fetch(`${API_BASE}/redemptions/${encodeURIComponent(redemptionId)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'claimed', claimedAt: new Date().toISOString() })
+    });
+    const body = await res.json();
+
+    if (!res.ok) {
+      alert(body.error || 'Could not update this redemption.');
+      buttonEl.disabled = false;
+      buttonEl.textContent = 'Confirm handed out';
+      return;
+    }
+
+    const statusCell = rowEl.querySelector('.status-cell');
+    statusCell.innerHTML = '<span class="status-pill claimed">Claimed</span>';
+
+    const actionCell = rowEl.querySelector('.action-cell');
+    actionCell.innerHTML = '';
+    const claimedLabel = document.createElement('span');
+    claimedLabel.style.cssText = 'font-size:12px; color:var(--ink-muted);';
+    claimedLabel.textContent = `on ${new Date().toLocaleDateString()}`;
+    actionCell.appendChild(claimedLabel);
+
+  } catch (err) {
+    console.error('Failed to confirm redemption:', err);
+    alert('Could not reach the server. Please try again.');
+    buttonEl.disabled = false;
+    buttonEl.textContent = 'Confirm handed out';
   }
 }
 

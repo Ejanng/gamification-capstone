@@ -174,6 +174,23 @@
     font-size:14px;
   }
 
+  /* ---------- Redemption History ---------- */
+  #redemption-history-section{ margin-top:32px; }
+  #redemption-history-section .panel-desc{ font-size:12.5px; color:var(--ink-muted); margin:2px 0 16px; }
+
+  #redemption-history-list{ display:flex; flex-direction:column; gap:10px; }
+
+  .redemption-item{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
+    padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+  .redemption-item-info{ display:flex; flex-direction:column; gap:4px; }
+  .redemption-item-name{ font-size:14px; font-weight:600; }
+  .redemption-item-meta{ font-size:12px; color:var(--ink-muted); }
+
+  .status-pill.pending{ background:var(--gold-soft); color:#9A6B00; }
+  .status-pill.claimed{ background:#E8F8F0; color:var(--teal); }
+
   /* Unlocked state — bright, glowing */
   .reward-card.unlocked{
     background:linear-gradient(180deg, #FFFDF8, #FFF7E6);
@@ -224,6 +241,13 @@
     <p class="panel-desc">Reach the point cost to unlock a reward, then show this screen to your teacher to claim it.</p>
     <div id="rewards-grid"></div>
   </section>
+
+  <section id="redemption-history-section">
+    <h2>My Redemptions</h2>
+    <p class="panel-desc">Everything you've redeemed, and whether your teacher has handed it out yet.</p>
+    <div id="redemption-history-list"></div>
+    <div id="redemption-history-empty" style="display:none;" class="panel-desc">You haven't redeemed anything yet.</div>
+  </section>
 </main>
 
 <script>
@@ -260,21 +284,24 @@ const quizTypeLabels = {
 // after each redemption so the catalog re-locks/unlocks without a full reload.
 let currentPoints = 0;
 let rewardsCache = [];
+let redemptionsCache = [];
 
 async function loadDashboard() {
   document.getElementById('welcome-text').textContent = `Signed in as ${session.name}`;
 
   try {
-    const [quizzesRes, resultsRes, usersRes, rewardsRes] = await Promise.all([
+    const [quizzesRes, resultsRes, usersRes, rewardsRes, redemptionsRes] = await Promise.all([
       fetch(`${API_BASE}/quizzes`),
       fetch(`${API_BASE}/results`),
       fetch(`${API_BASE}/users`),
-      fetch(`${API_BASE}/rewards`)
+      fetch(`${API_BASE}/rewards`),
+      fetch(`${API_BASE}/redemptions`)
     ]);
     const quizzes = await quizzesRes.json();
     const results = await resultsRes.json();
     const users = await usersRes.json();
     const rewards = await rewardsRes.json();
+    const redemptions = await redemptionsRes.json();
 
     const myResults = results.filter(r => r.userId === session.id);
     const completedQuizIds = new Set(myResults.map(r => r.quizId));
@@ -293,9 +320,11 @@ async function loadDashboard() {
     const currentUser = users.find(u => u.id === session.id);
     currentPoints = currentUser ? (currentUser.points || 0) : 0;
     rewardsCache = rewards;
+    redemptionsCache = redemptions.filter(r => r.userId === session.id);
 
     updatePointsDisplay();
     renderRewardsCatalog(inTestMode);
+    renderRedemptionHistory();
 
   } catch (err) {
     console.error('Failed to load dashboard:', err);
@@ -393,6 +422,9 @@ async function handleRedeem(reward, buttonEl) {
     updatePointsDisplay();
     renderRewardsCatalog(); // re-render with the new point total (some rewards may now lock)
 
+    if (body.redemption) redemptionsCache.push(body.redemption);
+    renderRedemptionHistory();
+
     alert(`Redeemed "${reward.reward_name}"! Show your teacher to collect it.`);
 
   } catch (err) {
@@ -401,6 +433,42 @@ async function handleRedeem(reward, buttonEl) {
     buttonEl.disabled = false;
     buttonEl.textContent = 'Redeem';
   }
+}
+
+const redemptionStatusLabels = {
+  pending: 'Pending pickup',
+  claimed: 'Claimed'
+};
+
+function renderRedemptionHistory() {
+  const listEl = document.getElementById('redemption-history-list');
+  const emptyEl = document.getElementById('redemption-history-empty');
+
+  if (!redemptionsCache.length) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  // Newest first.
+  const sorted = [...redemptionsCache].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  listEl.innerHTML = '';
+  sorted.forEach(r => {
+    const status = r.status || 'pending'; // older records may predate the status field
+    const item = document.createElement('div');
+    item.className = 'redemption-item';
+    item.innerHTML = `
+      <div class="redemption-item-info">
+        <div class="redemption-item-name"></div>
+        <div class="redemption-item-meta">${r.point_cost} pts &middot; ${new Date(r.timestamp).toLocaleString()}</div>
+      </div>
+      <span class="status-pill ${status}">${redemptionStatusLabels[status] || status}</span>
+    `;
+    item.querySelector('.redemption-item-name').textContent = r.reward_name;
+    listEl.appendChild(item);
+  });
 }
 
 function renderLeaderboard(users) {

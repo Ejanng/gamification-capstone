@@ -321,6 +321,23 @@
     background:var(--teal);
   }
 
+  .status-pill{
+    display:inline-block;
+    font-size:11.5px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:12px;
+  }
+  .status-pill.pending{ background:#FDECC8; color:#9A6B00; }
+  .status-pill.claimed{ background:#E8F8F0; color:var(--teal); }
+
+  .btn-confirm{
+    background:var(--teal);
+    color:#fff;
+  }
+  .btn-confirm:hover{ background:#229960; }
+  .btn-confirm:disabled{ background:#B9E4CE; cursor:not-allowed; }
+
   /* ---------- Reward Catalog (teacher form) ---------- */
   .reward-list-item{
     display:flex;
@@ -612,6 +629,8 @@
             <th>Points spent</th>
             <th>Remaining points</th>
             <th>When</th>
+            <th>Status</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody id="redemption-history-tbody"></tbody>

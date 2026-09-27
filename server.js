@@ -159,6 +159,8 @@ app.post('/api/redeem', (req, res) => {
       reward_name: reward.reward_name,
       point_cost: reward.point_cost,
       remainingPoints: user.points,
+      status: 'pending', // 'pending' until a teacher confirms physical hand-out, then 'claimed'
+      claimedAt: null,
       timestamp: new Date().toISOString()
     };
     redemptions.push(redemptionRecord);

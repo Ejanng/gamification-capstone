@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "id": "rd_1790480388767",
+    "userId": "u001",
+    "studentName": "Juan Dela Cruz",
+    "rewardId": "rw005",
+    "reward_name": "Highlighter Set",
+    "point_cost": 80,
+    "remainingPoints": 111,
+    "status": "pending",
+    "claimedAt": null,
+    "timestamp": "2026-09-27T03:39:48.767Z"
+  }
+]
