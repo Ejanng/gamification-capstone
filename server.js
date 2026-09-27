@@ -117,6 +117,7 @@ registerRoutes('users', 'users.json');
 registerRoutes('quizzes', 'quizzes.json');
 registerRoutes('results', 'results.json');
 registerRoutes('teachers', 'teachers.json');
+registerRoutes('rewards', 'rewards.json');
 
 // ---------- Auth (simple, capstone-scope only — NOT production security) ----------
 // Students "log in" by picking their existing record from users.json; no password.

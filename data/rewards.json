@@ -1,0 +1,20 @@
+[
+  {
+    "id": "rw001",
+    "reward_name": "+5 Quiz Bonus",
+    "point_cost": 50,
+    "icon_url": "🎯"
+  },
+  {
+    "id": "rw002",
+    "reward_name": "Homework Pass",
+    "point_cost": 100,
+    "icon_url": "📝"
+  },
+  {
+    "id": "rw003",
+    "reward_name": "Choose Your Seat for a Week",
+    "point_cost": 150,
+    "icon_url": "🪑"
+  }
+]

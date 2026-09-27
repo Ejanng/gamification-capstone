@@ -99,6 +99,82 @@
   .leaderboard-points{
     font-family:'Space Grotesk', sans-serif; font-size:13.5px; font-weight:700; color:var(--gold);
   }
+
+  /* ---------- Rewards Catalog ---------- */
+  #rewards-catalog-section{ margin-top:32px; }
+  #rewards-catalog-section .panel-desc{ font-size:12.5px; color:var(--ink-muted); margin:2px 0 16px; }
+
+  #rewards-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+    gap:14px;
+  }
+
+  .reward-card{
+    border-radius:var(--radius-md);
+    padding:18px 16px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    position:relative;
+    border:1px solid var(--border);
+    background:var(--surface);
+  }
+
+  .reward-card-icon{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:26px;
+    overflow:hidden;
+  }
+  .reward-card-icon img{ width:100%; height:100%; object-fit:cover; }
+
+  .reward-card-name{ font-size:13.5px; font-weight:600; }
+  .reward-card-cost{ font-size:12px; color:var(--ink-muted); }
+  .reward-card-status{ font-size:11px; font-weight:600; margin-top:2px; }
+
+  /* Locked state — greyed out, padlock */
+  .reward-card.locked{
+    background:#F1F1F4;
+    border-color:var(--border);
+    opacity:0.72;
+  }
+  .reward-card.locked .reward-card-icon{
+    background:#E1E2EC;
+    filter:grayscale(1);
+  }
+  .reward-card.locked .reward-card-status{ color:var(--ink-muted); }
+  .reward-card.locked::after{
+    content:"🔒";
+    position:absolute;
+    top:10px;
+    right:12px;
+    font-size:14px;
+  }
+
+  /* Unlocked state — bright, glowing */
+  .reward-card.unlocked{
+    background:linear-gradient(180deg, #FFFDF8, #FFF7E6);
+    border-color:var(--gold);
+    box-shadow:0 0 0 1px var(--gold), 0 6px 18px rgba(245, 166, 35, 0.28);
+  }
+  .reward-card.unlocked .reward-card-icon{
+    background:var(--gold-soft);
+  }
+  .reward-card.unlocked .reward-card-status{ color:#9A6B00; }
+  .reward-card.unlocked::after{
+    content:"✨";
+    position:absolute;
+    top:10px;
+    right:12px;
+    font-size:14px;
+  }
 </style>
 </head>
 <body>
@@ -125,6 +201,12 @@
       <ol id="leaderboard-list"></ol>
     </aside>
   </div>
+
+  <section id="rewards-catalog-section">
+    <h2>Rewards Catalog</h2>
+    <p class="panel-desc">Reach the point cost to unlock a reward, then show this screen to your teacher to claim it.</p>
+    <div id="rewards-grid"></div>
+  </section>
 </main>
 
 <script>
@@ -161,25 +243,81 @@ async function loadDashboard() {
   document.getElementById('welcome-text').textContent = `Signed in as ${session.name}`;
 
   try {
-    const [quizzesRes, resultsRes, usersRes] = await Promise.all([
+    const [quizzesRes, resultsRes, usersRes, rewardsRes] = await Promise.all([
       fetch(`${API_BASE}/quizzes`),
       fetch(`${API_BASE}/results`),
-      fetch(`${API_BASE}/users`)
+      fetch(`${API_BASE}/users`),
+      fetch(`${API_BASE}/rewards`)
     ]);
     const quizzes = await quizzesRes.json();
     const results = await resultsRes.json();
     const users = await usersRes.json();
+    const rewards = await rewardsRes.json();
 
     const myResults = results.filter(r => r.userId === session.id);
     const completedQuizIds = new Set(myResults.map(r => r.quizId));
 
     renderQuizList(quizzes, completedQuizIds);
     renderLeaderboard(users);
+
+    // Research constraint: hide the Rewards Catalog while the student still
+    // has an incomplete Pre-Test or Post-Test assigned — that's the window
+    // where gamification elements shouldn't be visible, to protect the
+    // baseline/endline measurement from being influenced by reward-seeking.
+    const inTestMode = quizzes.some(q =>
+      (q.quizType === 'pre-test' || q.quizType === 'post-test') && !completedQuizIds.has(q.id)
+    );
+
+    const currentUser = users.find(u => u.id === session.id);
+    renderRewardsCatalog(rewards, currentUser ? (currentUser.points || 0) : 0, inTestMode);
+
   } catch (err) {
     console.error('Failed to load dashboard:', err);
     document.getElementById('quiz-list').innerHTML =
       '<div id="empty-state">Could not load quizzes. Is the server running?</div>';
   }
+}
+
+function renderRewardIcon(iconValue) {
+  const looksLikeUrl = /^https?:\/\//i.test(iconValue || '');
+  return looksLikeUrl
+    ? `<img src="${iconValue}" alt="">`
+    : (iconValue || '🎁');
+}
+
+function renderRewardsCatalog(rewards, currentPoints, inTestMode) {
+  const section = document.getElementById('rewards-catalog-section');
+  const grid = document.getElementById('rewards-grid');
+
+  if (inTestMode) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+
+  if (!rewards.length) {
+    grid.innerHTML = '<p style="color:var(--ink-muted); font-size:13.5px;">No rewards have been added yet.</p>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  rewards.forEach(reward => {
+    const isUnlocked = currentPoints >= reward.point_cost;
+
+    const card = document.createElement('div');
+    card.className = `reward-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+    card.dataset.rewardId = reward.id;
+
+    card.innerHTML = `
+      <div class="reward-card-icon">${renderRewardIcon(reward.icon_url)}</div>
+      <div class="reward-card-name"></div>
+      <div class="reward-card-cost">${reward.point_cost} pts</div>
+      <div class="reward-card-status">${isUnlocked ? 'Unlocked — show your teacher' : `${reward.point_cost - currentPoints} more points needed`}</div>
+    `;
+    card.querySelector('.reward-card-name').textContent = reward.reward_name;
+
+    grid.appendChild(card);
+  });
 }
 
 function renderLeaderboard(users) {

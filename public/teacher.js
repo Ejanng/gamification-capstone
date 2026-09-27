@@ -49,6 +49,14 @@ const dom = {
   quizList: document.getElementById('quiz-list'),
   quizListEmpty: document.getElementById('quiz-list-empty'),
 
+  rewardForm: document.getElementById('reward-form'),
+  rewardNameInput: document.getElementById('reward-name-input'),
+  rewardCostInput: document.getElementById('reward-cost-input'),
+  rewardIconInput: document.getElementById('reward-icon-input'),
+  saveRewardBtn: document.getElementById('save-reward-btn'),
+  rewardList: document.getElementById('reward-list'),
+  rewardListEmpty: document.getElementById('reward-list-empty'),
+
   progressTbody: document.getElementById('student-progress-tbody'),
   searchInput: document.getElementById('student-search-input'),
   refreshBtn: document.getElementById('refresh-progress-btn')
@@ -72,11 +80,14 @@ function init() {
   dom.refreshBtn.addEventListener('click', renderStudentProgress);
   dom.searchInput.addEventListener('input', renderStudentProgress);
 
+  dom.rewardForm.addEventListener('submit', handleRewardFormSubmit);
+
   // Replace the static placeholder question block in the HTML with one built
   // the same way dynamically-added ones are, so it also gets a Remove button.
   exitEditMode();
 
   renderQuizList();
+  renderRewardList();
   renderStudentProgress();
 }
 
@@ -274,6 +285,110 @@ async function deleteQuiz(quizId) {
   } catch (err) {
     console.error(err);
     alert('Could not delete this quiz.');
+  }
+}
+
+// ============================================================
+// REWARD CATALOG (teacher side)
+// ============================================================
+async function handleRewardFormSubmit(e) {
+  e.preventDefault();
+
+  const reward_name = dom.rewardNameInput.value.trim();
+  const point_cost = Number(dom.rewardCostInput.value);
+  const icon_url = dom.rewardIconInput.value.trim();
+
+  if (!reward_name || !point_cost || point_cost <= 0) {
+    alert('Enter a reward name and a point cost greater than 0.');
+    return;
+  }
+
+  dom.saveRewardBtn.disabled = true;
+  dom.saveRewardBtn.textContent = 'Saving...';
+
+  try {
+    const res = await fetch(`${API_BASE}/rewards`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: `rw_${Date.now()}`,
+        reward_name,
+        point_cost,
+        icon_url: icon_url || '🎁'
+      })
+    });
+    if (!res.ok) throw new Error('Failed to save reward');
+
+    dom.rewardForm.reset();
+    await renderRewardList();
+
+  } catch (err) {
+    console.error(err);
+    alert('Could not save this reward.');
+  } finally {
+    dom.saveRewardBtn.disabled = false;
+    dom.saveRewardBtn.textContent = 'Add reward';
+  }
+}
+
+function renderRewardIcon(iconValue) {
+  // Anything that looks like a URL renders as an <img>; otherwise treat it as an emoji/text glyph.
+  const looksLikeUrl = /^https?:\/\//i.test(iconValue || '');
+  return looksLikeUrl
+    ? `<img src="${iconValue}" alt="">`
+    : (iconValue || '🎁');
+}
+
+async function deleteReward(rewardId) {
+  if (!confirm('Delete this reward? Students will no longer see it in their catalog.')) return;
+  try {
+    const res = await fetch(`${API_BASE}/rewards/${rewardId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete reward');
+    await renderRewardList();
+  } catch (err) {
+    console.error(err);
+    alert('Could not delete this reward.');
+  }
+}
+
+async function renderRewardList() {
+  try {
+    const res = await fetch(`${API_BASE}/rewards`);
+    if (!res.ok) throw new Error('Failed to fetch rewards');
+    const rewards = await res.json();
+
+    dom.rewardList.innerHTML = '';
+
+    if (!rewards.length) {
+      dom.rewardListEmpty.style.display = 'block';
+      return;
+    }
+    dom.rewardListEmpty.style.display = 'none';
+
+    rewards.forEach(reward => {
+      const item = document.createElement('div');
+      item.className = 'reward-list-item';
+      item.dataset.rewardId = reward.id;
+
+      item.innerHTML = `
+        <div class="reward-list-item-info">
+          <div class="reward-list-item-icon">${renderRewardIcon(reward.icon_url)}</div>
+          <div>
+            <div class="reward-list-item-title"></div>
+            <div class="reward-list-item-cost">${reward.point_cost} points</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-danger btn-sm delete-reward-btn">Delete</button>
+      `;
+      item.querySelector('.reward-list-item-title').textContent = reward.reward_name;
+      item.querySelector('.delete-reward-btn').addEventListener('click', () => deleteReward(reward.id));
+
+      dom.rewardList.appendChild(item);
+    });
+
+  } catch (err) {
+    console.error('Failed to render reward list:', err);
+    dom.rewardList.innerHTML = '<p style="color:var(--ink-muted); font-size:13.5px;">Could not load rewards.</p>';
   }
 }
 
