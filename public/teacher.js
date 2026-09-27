@@ -461,14 +461,16 @@ async function renderQuizList() {
 // ============================================================
 async function renderStudentProgress() {
   try {
-    const [usersRes, resultsRes, quizzesRes] = await Promise.all([
+    const [usersRes, resultsRes, quizzesRes, redemptionsRes] = await Promise.all([
       fetch(`${API_BASE}/users`),
       fetch(`${API_BASE}/results`),
-      fetch(`${API_BASE}/quizzes`)
+      fetch(`${API_BASE}/quizzes`),
+      fetch(`${API_BASE}/redemptions`)
     ]);
     const users = await usersRes.json();
     const results = await resultsRes.json();
     const quizzes = await quizzesRes.json();
+    const redemptions = await redemptionsRes.json();
 
     const totalQuizzes = quizzes.length;
     const searchTerm = dom.searchInput.value.trim().toLowerCase();
@@ -477,7 +479,8 @@ async function renderStudentProgress() {
       .map(user => {
         const userResults = results.filter(r => r.userId === user.id);
         const distinctQuizzesDone = new Set(userResults.map(r => r.quizId)).size;
-        return { user, quizzesDone: distinctQuizzesDone };
+        const rewardsClaimed = redemptions.filter(r => r.userId === user.id).length;
+        return { user, quizzesDone: distinctQuizzesDone, rewardsClaimed };
       })
       .filter(row => !searchTerm || row.user.name.toLowerCase().includes(searchTerm))
       .sort((a, b) => (b.user.points || 0) - (a.user.points || 0));
@@ -485,12 +488,12 @@ async function renderStudentProgress() {
     dom.progressTbody.innerHTML = '';
 
     if (!rows.length) {
-      dom.progressTbody.innerHTML = `<tr><td colspan="7" class="empty-state">No students match.</td></tr>`;
+      dom.progressTbody.innerHTML = `<tr><td colspan="8" class="empty-state">No students match.</td></tr>`;
       return;
     }
 
     rows.forEach((row, index) => {
-      const { user, quizzesDone } = row;
+      const { user, quizzesDone, rewardsClaimed } = row;
       const completionPercent = totalQuizzes > 0 ? Math.round((quizzesDone / totalQuizzes) * 100) : 0;
 
       const tr = document.createElement('tr');
@@ -502,6 +505,7 @@ async function renderStudentProgress() {
         <td><span class="level-pill">Lvl ${user.level || 1}</span></td>
         <td class="points-cell">${user.points || 0}</td>
         <td>${quizzesDone} / ${totalQuizzes}</td>
+        <td>${rewardsClaimed}</td>
         <td>
           <div class="completion-bar-track">
             <div class="completion-bar-fill" style="width:${completionPercent}%"></div>
@@ -516,7 +520,7 @@ async function renderStudentProgress() {
 
   } catch (err) {
     console.error('Failed to render student progress:', err);
-    dom.progressTbody.innerHTML = `<tr><td colspan="7" class="empty-state">Could not load student progress.</td></tr>`;
+    dom.progressTbody.innerHTML = `<tr><td colspan="8" class="empty-state">Could not load student progress.</td></tr>`;
   }
 }
 
