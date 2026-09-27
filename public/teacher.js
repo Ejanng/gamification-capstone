@@ -529,9 +529,14 @@ async function renderStudentProgress() {
 // ============================================================
 async function renderRedemptionHistory() {
   try {
-    const res = await fetch(`${API_BASE}/redemptions`);
-    if (!res.ok) throw new Error('Failed to fetch redemptions');
-    const redemptions = await res.json();
+    const [redemptionsRes, rewardsRes] = await Promise.all([
+      fetch(`${API_BASE}/redemptions`),
+      fetch(`${API_BASE}/rewards`)
+    ]);
+    if (!redemptionsRes.ok || !rewardsRes.ok) throw new Error('Failed to fetch redemption data');
+    const redemptions = await redemptionsRes.json();
+    const rewards = await rewardsRes.json();
+    const rewardsById = new Map(rewards.map(reward => [reward.id, reward]));
 
     dom.redemptionTbody.innerHTML = '';
 
@@ -547,36 +552,51 @@ async function renderRedemptionHistory() {
     sorted.forEach(r => {
       const status = r.status || 'pending'; // older records may predate the status field
       const isClaimed = status === 'claimed';
+      const reward = rewardsById.get(r.rewardId);
+      const rewardName = reward ? reward.reward_name : r.reward_name;
+      const rewardIcon = reward ? reward.icon_url : '🎁';
 
       const tr = document.createElement('tr');
       tr.dataset.redemptionId = r.id;
+      const statusLabel = isClaimed ? 'Claimed' : 'Pending pickup';
       tr.innerHTML = `
         <td class="student-name-cell"></td>
-        <td class="reward-name-cell"></td>
+        <td class="reward-icon-cell" aria-label=""></td>
         <td class="points-cell">-${r.point_cost}</td>
         <td>${r.remainingPoints}</td>
         <td>${new Date(r.timestamp).toLocaleString()}</td>
-        <td class="status-cell">
-          <span class="status-pill ${status}">${isClaimed ? 'Claimed' : 'Pending pickup'}</span>
+        <td class="status-cell ${status}">
+          <span class="status-pill ${status}" title="${statusLabel}" aria-label="${statusLabel}"></span>
         </td>
         <td class="action-cell"></td>
       `;
       tr.querySelector('.student-name-cell').textContent = r.studentName || r.userId;
-      tr.querySelector('.reward-name-cell').textContent = r.reward_name;
+      const rewardCell = tr.querySelector('.reward-icon-cell');
+      rewardCell.innerHTML = renderRewardIcon(rewardIcon);
+      rewardCell.title = rewardName;
+      rewardCell.setAttribute('aria-label', rewardName);
 
       const actionCell = tr.querySelector('.action-cell');
       if (isClaimed) {
-        const claimedLabel = document.createElement('span');
-        claimedLabel.style.cssText = 'font-size:12px; color:var(--ink-muted);';
-        claimedLabel.textContent = r.claimedAt ? `on ${new Date(r.claimedAt).toLocaleDateString()}` : '—';
-        actionCell.appendChild(claimedLabel);
+        actionCell.setAttribute('aria-label', 'No actions available');
       } else {
         const confirmBtn = document.createElement('button');
         confirmBtn.type = 'button';
         confirmBtn.className = 'btn btn-sm btn-confirm';
-        confirmBtn.textContent = 'Confirm handed out';
+        confirmBtn.textContent = '✓';
+        confirmBtn.setAttribute('aria-label', 'Mark reward as claimed');
+        confirmBtn.title = 'Mark reward as claimed';
         confirmBtn.addEventListener('click', () => confirmRedemption(r.id, tr, confirmBtn));
         actionCell.appendChild(confirmBtn);
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'btn btn-sm btn-danger';
+        cancelBtn.textContent = '×';
+        cancelBtn.setAttribute('aria-label', 'Cancel redemption');
+        cancelBtn.title = 'Cancel redemption';
+        cancelBtn.addEventListener('click', () => cancelRedemption(r.id));
+        actionCell.appendChild(cancelBtn);
       }
 
       dom.redemptionTbody.appendChild(tr);
@@ -588,15 +608,13 @@ async function renderRedemptionHistory() {
   }
 }
 
-// Marks a redemption as physically handed out. Uses the existing generic
-// PATCH /api/redemptions/:id route (server.js already registers CRUD routes
-// for 'redemptions'), so no backend change is needed beyond the status field.
+// Marks a redemption as physically handed out.
 async function confirmRedemption(redemptionId, rowEl, buttonEl) {
   const confirmed = confirm('Mark this reward as handed out to the student?');
   if (!confirmed) return;
 
   buttonEl.disabled = true;
-  buttonEl.textContent = 'Confirming...';
+  buttonEl.textContent = '…';
 
   try {
     const res = await fetch(`${API_BASE}/redemptions/${encodeURIComponent(redemptionId)}`, {
@@ -609,25 +627,45 @@ async function confirmRedemption(redemptionId, rowEl, buttonEl) {
     if (!res.ok) {
       alert(body.error || 'Could not update this redemption.');
       buttonEl.disabled = false;
-      buttonEl.textContent = 'Confirm handed out';
+      buttonEl.textContent = '✓';
       return;
     }
 
     const statusCell = rowEl.querySelector('.status-cell');
-    statusCell.innerHTML = '<span class="status-pill claimed">Claimed</span>';
+    statusCell.className = 'status-cell claimed';
+    statusCell.innerHTML = '<span class="status-pill claimed" title="Claimed" aria-label="Claimed"></span>';
 
     const actionCell = rowEl.querySelector('.action-cell');
     actionCell.innerHTML = '';
-    const claimedLabel = document.createElement('span');
-    claimedLabel.style.cssText = 'font-size:12px; color:var(--ink-muted);';
-    claimedLabel.textContent = `on ${new Date().toLocaleDateString()}`;
-    actionCell.appendChild(claimedLabel);
+    actionCell.setAttribute('aria-label', 'No actions available');
 
   } catch (err) {
     console.error('Failed to confirm redemption:', err);
     alert('Could not reach the server. Please try again.');
     buttonEl.disabled = false;
-    buttonEl.textContent = 'Confirm handed out';
+    buttonEl.textContent = '✓';
+  }
+}
+
+async function cancelRedemption(redemptionId) {
+  const confirmed = confirm('Cancel this redemption and return the points to the student?');
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/redemptions/${encodeURIComponent(redemptionId)}/cancel`, {
+      method: 'POST'
+    });
+    const body = await res.json();
+
+    if (!res.ok) {
+      alert(body.error || 'Could not cancel this redemption.');
+      return;
+    }
+
+    await renderRedemptionHistory();
+  } catch (err) {
+    console.error('Failed to cancel redemption:', err);
+    alert('Could not reach the server. Please try again.');
   }
 }
 

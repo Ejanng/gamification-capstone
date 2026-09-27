@@ -6,209 +6,7 @@
 <title>My Quizzes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#F7F7FB; --surface:#FFFFFF; --ink:#1B1D2A; --ink-muted:#5A5D74;
-    --indigo:#3A3D8F; --indigo-dark:#2B2E6E; --gold:#F5A623; --gold-soft:#FDECC8;
-    --teal:#2BB673; --border:#E1E2EC; --radius-sm:6px; --radius-md:10px;
-  }
-  *{ box-sizing:border-box; }
-  html,body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Inter', system-ui, sans-serif; }
-  h1,h2{ font-family:'Space Grotesk', sans-serif; margin:0; }
-
-  header.app-header{
-    background:var(--indigo); color:#fff; padding:18px 32px;
-    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
-  }
-  header.app-header h1{ font-size:19px; font-weight:600; }
-  #welcome-text{ font-size:12.5px; color:#C7C9E8; margin-top:2px; }
-  #points-display{ font-size:12.5px; color:var(--gold); font-weight:600; margin-top:2px; }
-  #logout-btn{
-    background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25);
-    color:#fff; font-family:inherit; font-size:13px; font-weight:500;
-    padding:7px 14px; border-radius:20px; cursor:pointer;
-  }
-  #logout-btn:hover{ background:rgba(255,255,255,0.2); }
-
-  main{ max-width:1200px; margin:0 auto; padding:28px 32px 48px; }
-
-  #dashboard-layout{
-    display:grid;
-    grid-template-columns:1fr 320px;
-    gap:24px;
-    align-items:start;
-  }
-  @media (max-width:820px){
-    #dashboard-layout{ grid-template-columns:1fr; }
-  }
-
-  #quiz-list{ display:flex; flex-direction:column; gap:12px; margin-top:18px; }
-
-  .quiz-card{
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
-    padding:18px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
-  }
-  .quiz-card-info{ display:flex; flex-direction:column; gap:6px; }
-  .quiz-card-title{ font-size:15.5px; font-weight:600; }
-  .quiz-card-meta{ font-size:12.5px; color:var(--ink-muted); display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-
-  .quiz-type-tag{ display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; }
-  .quiz-type-tag.pre-test{ background:var(--gold-soft); color:#9A6B00; }
-  .quiz-type-tag.post-test{ background:#E1E9FB; color:#2B4B8F; }
-  .quiz-type-tag.gamified{ background:#E8F8F0; color:#1D8A5A; }
-
-  .status-pill{ font-size:11.5px; font-weight:600; padding:3px 10px; border-radius:12px; }
-  .status-pill.done{ background:#E8F8F0; color:var(--teal); }
-  .status-pill.todo{ background:#EFF0FA; color:var(--indigo); }
-
-  .btn{
-    font-family:inherit; font-size:13.5px; font-weight:600; border-radius:var(--radius-sm);
-    padding:9px 18px; border:1px solid transparent; cursor:pointer; text-decoration:none; display:inline-block;
-  }
-  .btn-primary{ background:var(--indigo); color:#fff; }
-  .btn-primary:hover{ background:var(--indigo-dark); }
-  .btn-disabled{ background:#EAEAF2; color:var(--ink-muted); cursor:default; pointer-events:none; }
-
-  #empty-state{ text-align:center; padding:48px 16px; color:var(--ink-muted); font-size:13.5px; }
-
-  /* ---------- Leaderboard sidebar ---------- */
-  #leaderboard-panel{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius-md);
-    padding:20px;
-  }
-  #leaderboard-panel h2{ font-size:16px; font-weight:600; margin-bottom:2px; }
-  #leaderboard-panel .panel-desc{ font-size:12.5px; color:var(--ink-muted); margin:0 0 14px; }
-
-  #leaderboard-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
-
-  .leaderboard-entry{
-    display:flex; align-items:center; gap:10px; padding:10px 12px;
-    border-radius:var(--radius-sm); border:1px solid var(--border);
-  }
-  .leaderboard-entry.is-current-user{ border-color:var(--gold); background:var(--gold-soft); }
-
-  .leaderboard-rank{
-    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px;
-    color:var(--indigo); width:20px; flex-shrink:0;
-  }
-  .leaderboard-name{
-    flex:1; font-size:13.5px; font-weight:500; overflow:hidden;
-    text-overflow:ellipsis; white-space:nowrap;
-  }
-  .leaderboard-points{
-    font-family:'Space Grotesk', sans-serif; font-size:13.5px; font-weight:700; color:var(--gold);
-  }
-
-  /* ---------- Rewards Catalog ---------- */
-  #rewards-catalog-section{ margin-top:32px; }
-  #rewards-catalog-section .panel-desc{ font-size:12.5px; color:var(--ink-muted); margin:2px 0 16px; }
-
-  #rewards-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
-    gap:14px;
-  }
-
-  .reward-card{
-    border-radius:var(--radius-md);
-    padding:18px 16px;
-    text-align:center;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:8px;
-    position:relative;
-    border:1px solid var(--border);
-    background:var(--surface);
-  }
-
-  .reward-card-icon{
-    width:52px;
-    height:52px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:26px;
-    overflow:hidden;
-  }
-  .reward-card-icon img{ width:100%; height:100%; object-fit:cover; }
-
-  .reward-card-name{ font-size:13.5px; font-weight:600; }
-  .reward-card-cost{ font-size:12px; color:var(--ink-muted); }
-  .reward-card-status{ font-size:11px; font-weight:600; margin-top:2px; }
-
-  .redeem-btn{
-    margin-top:4px;
-    font-family:inherit;
-    font-size:12px;
-    font-weight:600;
-    border:none;
-    border-radius:6px;
-    padding:7px 16px;
-    cursor:pointer;
-    background:var(--indigo);
-    color:#fff;
-  }
-  .redeem-btn:hover{ background:var(--indigo-dark); }
-  .redeem-btn:disabled{ background:#B9BBDA; cursor:not-allowed; }
-
-  /* Locked state — greyed out, padlock */
-  .reward-card.locked{
-    background:#F1F1F4;
-    border-color:var(--border);
-    opacity:0.72;
-  }
-  .reward-card.locked .reward-card-icon{
-    background:#E1E2EC;
-    filter:grayscale(1);
-  }
-  .reward-card.locked .reward-card-status{ color:var(--ink-muted); }
-  .reward-card.locked::after{
-    content:"🔒";
-    position:absolute;
-    top:10px;
-    right:12px;
-    font-size:14px;
-  }
-
-  /* ---------- Redemption History ---------- */
-  #redemption-history-section{ margin-top:32px; }
-  #redemption-history-section .panel-desc{ font-size:12.5px; color:var(--ink-muted); margin:2px 0 16px; }
-
-  #redemption-history-list{ display:flex; flex-direction:column; gap:10px; }
-
-  .redemption-item{
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
-    padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
-  }
-  .redemption-item-info{ display:flex; flex-direction:column; gap:4px; }
-  .redemption-item-name{ font-size:14px; font-weight:600; }
-  .redemption-item-meta{ font-size:12px; color:var(--ink-muted); }
-
-  .status-pill.pending{ background:var(--gold-soft); color:#9A6B00; }
-  .status-pill.claimed{ background:#E8F8F0; color:var(--teal); }
-
-  /* Unlocked state — bright, glowing */
-  .reward-card.unlocked{
-    background:linear-gradient(180deg, #FFFDF8, #FFF7E6);
-    border-color:var(--gold);
-    box-shadow:0 0 0 1px var(--gold), 0 6px 18px rgba(245, 166, 35, 0.28);
-  }
-  .reward-card.unlocked .reward-card-icon{
-    background:var(--gold-soft);
-  }
-  .reward-card.unlocked .reward-card-status{ color:#9A6B00; }
-  .reward-card.unlocked::after{
-    content:"✨";
-    position:absolute;
-    top:10px;
-    right:12px;
-    font-size:14px;
-  }
-</style>
+<link rel="stylesheet" href="styles/student-dashboard.css">
 </head>
 <body>
 
@@ -226,13 +24,22 @@
     <div>
       <h2>Activities</h2>
       <div id="quiz-list"></div>
-      <div id="empty-state" style="display:none;">No quizzes have been assigned yet. Check back later.</div>
+      <div id="empty-state" class="is-hidden">No quizzes have been assigned yet. Check back later.</div>
     </div>
 
-    <aside id="leaderboard-panel">
-      <h2>Leaderboard</h2>
-      <p class="panel-desc">Ranked by total points.</p>
-      <ol id="leaderboard-list"></ol>
+    <aside id="dashboard-sidebar">
+      <section id="leaderboard-panel">
+        <h2>Leaderboard</h2>
+        <p class="panel-desc">Ranked by total points.</p>
+        <ol id="leaderboard-list"></ol>
+      </section>
+
+      <section id="redemption-history-section">
+        <h2>My Redemptions</h2>
+        <p class="panel-desc">Everything you've redeemed, and whether your teacher has handed it out yet.</p>
+        <div id="redemption-history-list"></div>
+        <div id="redemption-history-empty" class="panel-desc is-hidden">You haven't redeemed anything yet.</div>
+      </section>
     </aside>
   </div>
 
@@ -240,13 +47,6 @@
     <h2>Rewards Catalog</h2>
     <p class="panel-desc">Reach the point cost to unlock a reward, then show this screen to your teacher to claim it.</p>
     <div id="rewards-grid"></div>
-  </section>
-
-  <section id="redemption-history-section">
-    <h2>My Redemptions</h2>
-    <p class="panel-desc">Everything you've redeemed, and whether your teacher has handed it out yet.</p>
-    <div id="redemption-history-list"></div>
-    <div id="redemption-history-empty" style="display:none;" class="panel-desc">You haven't redeemed anything yet.</div>
   </section>
 </main>
 
@@ -359,7 +159,7 @@ function renderRewardsCatalog(inTestMode) {
   section.style.display = '';
 
   if (!rewardsCache.length) {
-    grid.innerHTML = '<p style="color:var(--ink-muted); font-size:13.5px;">No rewards have been added yet.</p>';
+    grid.innerHTML = '<p class="no-rewards-message">No rewards have been added yet.</p>';
     return;
   }
 

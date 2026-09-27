@@ -1,14 +1,14 @@
 [
   {
-    "id": "rd_1790480388767",
+    "id": "rd_1790482554128",
     "userId": "u001",
     "studentName": "Juan Dela Cruz",
     "rewardId": "rw005",
     "reward_name": "Highlighter Set",
     "point_cost": 80,
     "remainingPoints": 111,
-    "status": "pending",
-    "claimedAt": null,
-    "timestamp": "2026-09-27T03:39:48.767Z"
+    "status": "claimed",
+    "claimedAt": "2026-09-27T04:23:52.995Z",
+    "timestamp": "2026-09-27T04:15:54.128Z"
   }
 ]

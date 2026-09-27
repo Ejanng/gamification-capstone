@@ -120,6 +120,42 @@ registerRoutes('teachers', 'teachers.json');
 registerRoutes('rewards', 'rewards.json');
 registerRoutes('redemptions', 'redemptions.json');
 
+// Cancel a pending redemption and return its points to the student.
+app.post('/api/redemptions/:id/cancel', (req, res) => {
+  try {
+    const redemptions = readJSON('redemptions.json');
+    const redemptionIndex = redemptions.findIndex(r => r.id === req.params.id);
+    if (redemptionIndex === -1) {
+      return res.status(404).json({ error: 'Redemption not found' });
+    }
+
+    const redemption = redemptions[redemptionIndex];
+    if (redemption.status === 'claimed') {
+      return res.status(400).json({ error: 'A claimed redemption cannot be cancelled' });
+    }
+
+    const users = readJSON('users.json');
+    const userIndex = users.findIndex(user => user.id === redemption.userId);
+    if (userIndex === -1) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    users[userIndex].points = (users[userIndex].points || 0) + redemption.point_cost;
+    redemptions.splice(redemptionIndex, 1);
+    writeJSON('users.json', users);
+    writeJSON('redemptions.json', redemptions);
+
+    res.json({
+      message: 'Redemption cancelled',
+      record: redemption,
+      restoredPoints: redemption.point_cost,
+      remainingPoints: users[userIndex].points
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ---------- Redeem a reward (atomic: deduct points + log the redemption together) ----------
 // Doing this as one dedicated endpoint (rather than the client reading users.json,
 // subtracting locally, then PUTting the whole array back) avoids a race condition

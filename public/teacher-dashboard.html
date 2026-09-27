@@ -6,445 +6,7 @@
 <title>Teacher Dashboard — Gamification Capstone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#F7F7FB;
-    --surface:#FFFFFF;
-    --ink:#1B1D2A;
-    --ink-muted:#5A5D74;
-    --indigo:#3A3D8F;
-    --indigo-dark:#2B2E6E;
-    --gold:#F5A623;
-    --teal:#2BB673;
-    --red:#D64545;
-    --border:#E1E2EC;
-    --radius-sm:6px;
-    --radius-md:10px;
-  }
-
-  *{ box-sizing:border-box; }
-
-  html,body{
-    margin:0;
-    padding:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'Inter', system-ui, sans-serif;
-    font-size:15px;
-    line-height:1.5;
-  }
-
-  h1,h2,h3{
-    font-family:'Space Grotesk', sans-serif;
-    margin:0;
-    color:var(--ink);
-  }
-
-  a{ color:inherit; }
-
-  /* ---------- Top bar ---------- */
-  header.app-header{
-    background:var(--indigo);
-    color:#fff;
-    padding:18px 32px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-  }
-
-  header.app-header h1{
-    font-size:20px;
-    font-weight:600;
-    color:#fff;
-    letter-spacing:0.2px;
-  }
-
-  header.app-header .header-sub{
-    font-size:13px;
-    color:#C7C9E8;
-    margin-top:2px;
-  }
-
-  header.app-header .teacher-badge{
-    background:rgba(255,255,255,0.12);
-    border:1px solid rgba(255,255,255,0.25);
-    padding:6px 14px;
-    border-radius:20px;
-    font-size:13px;
-    font-weight:500;
-  }
-
-  /* ---------- Layout ---------- */
-  main.dashboard-layout{
-    display:grid;
-    grid-template-columns:380px 1fr;
-    gap:24px;
-    padding:28px 32px 48px;
-    max-width:1400px;
-    margin:0 auto;
-    align-items:start;
-  }
-
-  @media (max-width:900px){
-    main.dashboard-layout{
-      grid-template-columns:1fr;
-    }
-  }
-
-  section.panel{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius-md);
-    padding:22px;
-  }
-
-  section.panel > h2{
-    font-size:17px;
-    font-weight:600;
-    margin-bottom:4px;
-  }
-
-  .panel-desc{
-    font-size:13px;
-    color:var(--ink-muted);
-    margin-bottom:18px;
-  }
-
-  /* ---------- Quiz Creator form ---------- */
-  #quiz-creator-panel{
-    position:sticky;
-    top:24px;
-  }
-
-  #quiz-creator-form{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-  }
-
-  .quiz-type-tag{
-    display:inline-block;
-    font-size:11px;
-    font-weight:600;
-    padding:2px 8px;
-    border-radius:10px;
-    }
-    .quiz-type-tag.pre-test{ background:#FDECC8; color:#9A6B00; }
-    .quiz-type-tag.post-test{ background:#E1E9FB; color:#2B4B8F; }
-    .quiz-type-tag.gamified{ background:#E8F8F0; color:#1D8A5A; }
-
-  .field-group{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-  }
-
-  .field-group label{
-    font-size:12.5px;
-    font-weight:600;
-    color:var(--ink-muted);
-  }
-
-  .field-group input[type="text"],
-  .field-group input[type="number"],
-  .field-group select{
-    border:1px solid var(--border);
-    border-radius:var(--radius-sm);
-    padding:9px 11px;
-    font-family:inherit;
-    font-size:14px;
-    color:var(--ink);
-    background:#fff;
-  }
-
-  .field-group input:focus,
-  .field-group select:focus{
-    outline:2px solid var(--indigo);
-    outline-offset:1px;
-    border-color:var(--indigo);
-  }
-
-  fieldset.question-block{
-    border:1px solid var(--border);
-    border-radius:var(--radius-sm);
-    padding:14px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-
-  fieldset.question-block legend{
-    font-size:12.5px;
-    font-weight:600;
-    color:var(--indigo);
-    padding:0 4px;
-  }
-
-  .choice-row{
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-
-  .choice-row input[type="text"]{
-    flex:1;
-  }
-
-  .choice-row input[type="radio"]{
-    accent-color:var(--teal);
-    width:16px;
-    height:16px;
-  }
-
-  #questions-container{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-  }
-
-  .btn{
-    font-family:inherit;
-    font-size:13.5px;
-    font-weight:600;
-    border-radius:var(--radius-sm);
-    padding:10px 16px;
-    border:1px solid transparent;
-    cursor:pointer;
-  }
-
-  .btn-primary{
-    background:var(--indigo);
-    color:#fff;
-  }
-  .btn-primary:hover{ background:var(--indigo-dark); }
-
-  .btn-secondary{
-    background:#fff;
-    color:var(--indigo);
-    border-color:var(--indigo);
-  }
-  .btn-secondary:hover{ background:#EEEFFB; }
-
-  .form-actions{
-    display:flex;
-    gap:10px;
-    margin-top:4px;
-  }
-
-  /* ---------- Student Progress Table ---------- */
-  .table-toolbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:14px;
-    gap:12px;
-    flex-wrap:wrap;
-  }
-
-  .table-toolbar input[type="search"]{
-    border:1px solid var(--border);
-    border-radius:var(--radius-sm);
-    padding:8px 12px;
-    font-size:13.5px;
-    width:220px;
-  }
-
-  .table-scroll{
-    overflow-x:auto;
-    border:1px solid var(--border);
-    border-radius:var(--radius-sm);
-  }
-
-  table#student-progress-table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:13.5px;
-  }
-
-  #student-progress-table thead th{
-    text-align:left;
-    background:#F1F1F8;
-    color:var(--ink-muted);
-    font-weight:600;
-    font-size:12px;
-    text-transform:none;
-    padding:10px 14px;
-    border-bottom:1px solid var(--border);
-    white-space:nowrap;
-  }
-
-  #student-progress-table tbody td{
-    padding:11px 14px;
-    border-bottom:1px solid var(--border);
-    vertical-align:middle;
-  }
-
-  #student-progress-table tbody tr:last-child td{
-    border-bottom:none;
-  }
-
-  #student-progress-table tbody tr:hover{
-    background:#FAFAFD;
-  }
-
-  .rank-cell{
-    font-family:'Space Grotesk', sans-serif;
-    font-weight:600;
-    color:var(--indigo);
-  }
-
-  .points-cell{
-    font-weight:600;
-    color:var(--gold);
-  }
-
-  .level-pill{
-    display:inline-block;
-    background:#EFF0FA;
-    color:var(--indigo);
-    font-size:11.5px;
-    font-weight:600;
-    padding:3px 9px;
-    border-radius:12px;
-  }
-
-  .completion-bar-track{
-    width:90px;
-    height:6px;
-    background:#EAEAF2;
-    border-radius:4px;
-    overflow:hidden;
-  }
-
-  .completion-bar-fill{
-    height:100%;
-    background:var(--teal);
-  }
-
-  .status-pill{
-    display:inline-block;
-    font-size:11.5px;
-    font-weight:600;
-    padding:3px 9px;
-    border-radius:12px;
-  }
-  .status-pill.pending{ background:#FDECC8; color:#9A6B00; }
-  .status-pill.claimed{ background:#E8F8F0; color:var(--teal); }
-
-  .btn-confirm{
-    background:var(--teal);
-    color:#fff;
-  }
-  .btn-confirm:hover{ background:#229960; }
-  .btn-confirm:disabled{ background:#B9E4CE; cursor:not-allowed; }
-
-  /* ---------- Reward Catalog (teacher form) ---------- */
-  .reward-list-item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    padding:12px 14px;
-    border:1px solid var(--border);
-    border-radius:var(--radius-sm);
-    margin-bottom:10px;
-    flex-wrap:wrap;
-  }
-  .reward-list-item-info{
-    display:flex;
-    align-items:center;
-    gap:12px;
-  }
-  .reward-list-item-icon{
-    width:34px;
-    height:34px;
-    border-radius:8px;
-    background:#F1F1F8;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:17px;
-    flex-shrink:0;
-    overflow:hidden;
-  }
-  .reward-list-item-icon img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-  }
-  .reward-list-item-title{
-    font-size:14px;
-    font-weight:600;
-  }
-  .reward-list-item-cost{
-    font-size:12px;
-    color:var(--ink-muted);
-  }
-
-  /* ---------- Quiz List ---------- */
-  #quiz-list{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-
-  .quiz-list-item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    padding:12px 14px;
-    border:1px solid var(--border);
-    border-radius:var(--radius-sm);
-    flex-wrap:wrap;
-  }
-
-  .quiz-list-item-info{
-    display:flex;
-    flex-direction:column;
-    gap:5px;
-  }
-
-  .quiz-list-item-title{
-    font-size:14px;
-    font-weight:600;
-  }
-
-  .quiz-list-item-meta{
-    display:flex;
-    gap:8px;
-    align-items:center;
-    font-size:12px;
-    color:var(--ink-muted);
-    flex-wrap:wrap;
-  }
-
-  .quiz-list-item-actions{
-    display:flex;
-    gap:8px;
-  }
-
-  .btn-sm{
-    padding:6px 12px;
-    font-size:12.5px;
-  }
-
-  .btn-danger{
-    background:#fff;
-    color:var(--red, #D64545);
-    border-color:#D64545;
-  }
-  .btn-danger:hover{
-    background:#FBEAEA;
-  }
-
-  .empty-state{
-    padding:36px 16px;
-    text-align:center;
-    color:var(--ink-muted);
-    font-size:13.5px;
-  }
-</style>
+<link rel="stylesheet" href="styles/teacher-dashboard.css">
 </head>
 <body>
 
@@ -453,14 +15,15 @@
     <h1>Quiz &amp; Progress Control</h1>
     <div class="header-sub">Gamification &amp; Academic Performance — Capstone Dashboard</div>
   </div>
-  <div style="display:flex; align-items:center; gap:10px;">
+  <div class="header-actions">
     <div class="teacher-badge" id="teacher-identity">Teacher view</div>
-    <button type="button" class="btn btn-secondary" id="logout-btn" style="background:transparent; border-color:rgba(255,255,255,0.4); color:#fff;">Log out</button>
+    <button type="button" class="btn btn-secondary header-logout-btn" id="logout-btn">Log out</button>
   </div>
 </header>
 
 <main class="dashboard-layout">
 
+  <div id="dashboard-left-column">
   <!-- ================= QUIZ CREATOR ================= -->
   <section class="panel" id="quiz-creator-panel">
     <h2>Quiz Creator</h2>
@@ -535,13 +98,15 @@
       </div>
     </form>
   </section>
+  </div>
 
+  <div id="dashboard-middle-column">
   <!-- ================= REWARD CATALOG ================= -->
   <section class="panel" id="reward-catalog-panel">
     <h2>Reward Catalog</h2>
     <p class="panel-desc">Real-world rewards students can unlock by points. Claimed physically — no points are deducted here.</p>
 
-    <form id="reward-form" autocomplete="off" style="display:flex; flex-direction:column; gap:12px; margin-bottom:18px;">
+    <form id="reward-form" autocomplete="off" class="reward-form">
       <div class="field-group">
         <label for="reward-name-input">Reward name</label>
         <input type="text" id="reward-name-input" placeholder="e.g. Homework Pass" required>
@@ -558,7 +123,7 @@
     </form>
 
     <div id="reward-list"></div>
-    <p id="reward-list-empty" style="display:none; color:var(--ink-muted); font-size:13.5px;">No rewards yet — add one above.</p>
+    <p id="reward-list-empty" class="is-hidden empty-muted">No rewards yet — add one above.</p>
   </section>
 
   <!-- ================= QUIZ LIST ================= -->
@@ -567,13 +132,41 @@
     <p class="panel-desc">Everything saved to <code>quizzes.json</code>. Edit loads it back into the form on the left; Delete removes it permanently.</p>
 
     <div id="quiz-list-container">
-      <p id="quiz-list-empty" style="display:none; color:var(--ink-muted); font-size:13.5px;">No quizzes yet — create one on the left.</p>
+      <p id="quiz-list-empty" class="is-hidden empty-muted">No quizzes yet — create one on the left.</p>
       <div id="quiz-list"></div>
     </div>
   </section>
 
+  </div>
+
+  <div id="dashboard-right-column">
+  <!-- ================= REDEMPTION HISTORY ================= -->
+  <section class="panel" id="redemption-history-panel">
+    <h2>Redemption History</h2>
+    <p class="panel-desc">Audit trail from <code>redemptions.json</code> — check this against what's physically handed out.</p>
+
+    <div class="table-scroll">
+      <table id="redemption-history-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Reward</th>
+            <th title="Points spent">Spent</th>
+            <th title="Remaining points">Balance</th>
+            <th title="Redemption date and time">Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="redemption-history-tbody"></tbody>
+      </table>
+    </div>
+    <p id="redemption-history-empty" class="is-hidden empty-muted redemption-empty">No redemptions yet.</p>
+  </section>
+  </div>
+
   <!-- ================= STUDENT PROGRESS ================= -->
-  <section class="panel" id="student-progress-panel">
+  <section class="panel dashboard-bottom-panel" id="student-progress-panel">
     <h2>Student Progress</h2>
     <p class="panel-desc">Rankings and quiz completion, pulled from <code>users.json</code> and <code>results.json</code>.</p>
 
@@ -592,6 +185,7 @@
             <th>Level</th>
             <th>Points</th>
             <th>Quizzes done</th>
+            <th>Rewards claimed</th>
             <th>Completion</th>
           </tr>
         </thead>
@@ -604,39 +198,16 @@
             <td><span class="level-pill">Lvl 2</span></td>
             <td class="points-cell">150</td>
             <td>4 / 6</td>
+            <td>0</td>
             <td>
               <div class="completion-bar-track">
-                <div class="completion-bar-fill" style="width:66%"></div>
+                <div class="completion-bar-fill sample-completion"></div>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-  </section>
-
-  <!-- ================= REDEMPTION HISTORY ================= -->
-  <section class="panel" id="redemption-history-panel">
-    <h2>Redemption History</h2>
-    <p class="panel-desc">Audit trail from <code>redemptions.json</code> — check this against what's physically handed out.</p>
-
-    <div class="table-scroll">
-      <table id="redemption-history-table">
-        <thead>
-          <tr>
-            <th>Student</th>
-            <th>Reward</th>
-            <th>Points spent</th>
-            <th>Remaining points</th>
-            <th>When</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="redemption-history-tbody"></tbody>
-      </table>
-    </div>
-    <p id="redemption-history-empty" style="display:none; color:var(--ink-muted); font-size:13.5px; padding:16px 0;">No redemptions yet.</p>
   </section>
 
 </main>

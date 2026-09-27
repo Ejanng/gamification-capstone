@@ -20,7 +20,25 @@ padding:7px 14px; border-radius:20px; cursor:pointer;
 }
 #logout-btn:hover{ background:rgba(255,255,255,0.2); }
 
-main{ max-width:900px; margin:0 auto; padding:28px 32px 48px; }
+main{ max-width:1200px; margin:0 auto; padding:28px 32px 48px; }
+
+#dashboard-layout{
+display:grid;
+grid-template-columns:minmax(0, 1fr) 320px;
+gap:24px;
+align-items:start;
+}
+
+#dashboard-sidebar{
+display:flex;
+flex-direction:column;
+gap:24px;
+min-width:0;
+}
+
+@media (max-width:820px){
+#dashboard-layout{ grid-template-columns:1fr; }
+}
 
 #quiz-list{ display:flex; flex-direction:column; gap:12px; margin-top:18px; }
 
@@ -50,3 +68,167 @@ padding:9px 18px; border:1px solid transparent; cursor:pointer; text-decoration:
 .btn-disabled{ background:#EAEAF2; color:var(--ink-muted); cursor:default; pointer-events:none; }
 
 #empty-state{ text-align:center; padding:48px 16px; color:var(--ink-muted); font-size:13.5px; }
+.is-hidden{ display:none; }
+
+/* ---------- Leaderboard sidebar ---------- */
+#leaderboard-panel{
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:var(--radius-md);
+padding:20px;
+}
+#leaderboard-panel h2{ font-size:16px; font-weight:600; margin-bottom:2px; }
+#leaderboard-panel .panel-desc{ font-size:12.5px; color:var(--ink-muted); margin:0 0 14px; }
+
+#leaderboard-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+
+.leaderboard-entry{
+display:flex; align-items:center; gap:10px; padding:10px 12px;
+border-radius:var(--radius-sm); border:1px solid var(--border);
+}
+.leaderboard-entry.is-current-user{ border-color:var(--gold); background:var(--gold-soft); }
+
+.leaderboard-rank{
+font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px;
+color:var(--indigo); width:20px; flex-shrink:0;
+}
+.leaderboard-name{
+flex:1; font-size:13.5px; font-weight:500; overflow:hidden;
+text-overflow:ellipsis; white-space:nowrap;
+}
+.leaderboard-points{
+font-family:'Space Grotesk', sans-serif; font-size:13.5px; font-weight:700; color:var(--gold);
+}
+
+/* ---------- Rewards Catalog ---------- */
+#rewards-catalog-section{
+margin-top:32px;
+padding:22px;
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:var(--radius-md);
+}
+#rewards-catalog-section h2,
+#redemption-history-section h2{ font-size:17px; font-weight:600; }
+#rewards-catalog-section .panel-desc{ font-size:12.5px; color:var(--ink-muted); margin:2px 0 16px; }
+
+#rewards-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+gap:14px;
+}
+
+.no-rewards-message{
+color:var(--ink-muted);
+font-size:13.5px;
+}
+
+.reward-card{
+border-radius:var(--radius-md);
+padding:18px 16px;
+text-align:center;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:8px;
+position:relative;
+border:1px solid var(--border);
+background:var(--surface);
+}
+
+.reward-card-icon{
+width:52px;
+height:52px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:26px;
+overflow:hidden;
+}
+.reward-card-icon img{ width:100%; height:100%; object-fit:cover; }
+
+.reward-card-name{ font-size:13.5px; font-weight:600; }
+.reward-card-cost{ font-size:12px; color:var(--ink-muted); }
+.reward-card-status{ font-size:11px; font-weight:600; margin-top:2px; }
+
+.redeem-btn{
+margin-top:4px;
+font-family:inherit;
+font-size:12px;
+font-weight:600;
+border:none;
+border-radius:6px;
+padding:7px 16px;
+cursor:pointer;
+background:var(--indigo);
+color:#fff;
+}
+.redeem-btn:hover{ background:var(--indigo-dark); }
+.redeem-btn:disabled{ background:#B9BBDA; cursor:not-allowed; }
+
+/* Locked state — greyed out, padlock */
+.reward-card.locked{
+background:#F1F1F4;
+border-color:var(--border);
+opacity:0.72;
+}
+.reward-card.locked .reward-card-icon{
+background:#E1E2EC;
+filter:grayscale(1);
+}
+.reward-card.locked .reward-card-status{ color:var(--ink-muted); }
+.reward-card.locked::after{
+content:"🔒";
+position:absolute;
+top:10px;
+right:12px;
+font-size:14px;
+}
+
+/* ---------- Redemption History ---------- */
+#redemption-history-section{
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:var(--radius-md);
+padding:20px;
+}
+#redemption-history-section .panel-desc{ font-size:12.5px; color:var(--ink-muted); margin:2px 0 16px; }
+
+#redemption-history-list{ display:flex; flex-direction:column; gap:10px; }
+
+.redemption-item{
+background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
+padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+}
+.redemption-item-info{ display:flex; flex-direction:column; gap:4px; }
+.redemption-item-name{ font-size:14px; font-weight:600; }
+.redemption-item-meta{ font-size:12px; color:var(--ink-muted); }
+
+.status-pill.pending{
+background:#FFF0C2;
+color:#8A5A00;
+border:1px solid #F5C451;
+}
+.status-pill.claimed,
+.status-pill.accepted{
+background:#DDF7E9;
+color:#167A4A;
+border:1px solid #8DD8AE;
+}
+
+/* Unlocked state — bright, glowing */
+.reward-card.unlocked{
+background:linear-gradient(180deg, #FFFDF8, #FFF7E6);
+border-color:var(--gold);
+box-shadow:0 0 0 1px var(--gold), 0 6px 18px rgba(245, 166, 35, 0.28);
+}
+.reward-card.unlocked .reward-card-icon{ background:var(--gold-soft); }
+.reward-card.unlocked .reward-card-status{ color:#9A6B00; }
+.reward-card.unlocked::after{
+content:"✨";
+position:absolute;
+top:10px;
+right:12px;
+font-size:14px;
+}

@@ -65,10 +65,22 @@ font-size:13px;
 font-weight:500;
 }
 
+.header-actions{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.header-logout-btn{
+background:transparent;
+border-color:rgba(255,255,255,0.4);
+color:#fff;
+}
+
 /* ---------- Layout ---------- */
 main.dashboard-layout{
 display:grid;
-grid-template-columns:380px 1fr;
+grid-template-columns:minmax(300px, 380px) minmax(0, 1fr) minmax(0, 1fr);
 gap:24px;
 padding:28px 32px 48px;
 max-width:1400px;
@@ -76,9 +88,56 @@ margin:0 auto;
 align-items:start;
 }
 
-@media (max-width:900px){
+@media (max-width:1100px){
 main.dashboard-layout{
     grid-template-columns:1fr;
+}
+}
+
+#dashboard-left-column,
+#dashboard-middle-column,
+#dashboard-right-column{
+display:flex;
+flex-direction:column;
+gap:24px;
+min-width:0;
+}
+
+#dashboard-right-column{
+align-self:start;
+grid-column:3;
+grid-row:1;
+position:sticky;
+top:24px;
+}
+
+#dashboard-left-column{
+align-self:start;
+position:sticky;
+top:auto;
+bottom:24px;
+}
+
+@media (max-width:1100px){
+#dashboard-left-column{
+position:static;
+}
+#dashboard-right-column{
+grid-column:auto;
+grid-row:auto;
+position:static;
+}
+}
+
+.dashboard-bottom-panel{
+grid-column:1 / -1;
+grid-row:2;
+}
+
+@media (max-width:1100px){
+.dashboard-bottom-panel{
+grid-column:auto;
+grid-row:auto;
 }
 }
 
@@ -103,8 +162,7 @@ margin-bottom:18px;
 
 /* ---------- Quiz Creator form ---------- */
 #quiz-creator-panel{
-position:sticky;
-top:24px;
+position:relative;
 }
 
 #quiz-creator-form{
@@ -222,6 +280,70 @@ gap:10px;
 margin-top:4px;
 }
 
+.reward-form{
+display:flex;
+flex-direction:column;
+gap:12px;
+margin-bottom:18px;
+}
+
+/* ---------- Reward Catalog ---------- */
+.reward-list-item{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:16px;
+padding:12px 14px;
+margin-bottom:10px;
+border:1px solid var(--border);
+border-radius:var(--radius-sm);
+background:#fff;
+transition:border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.reward-list-item:hover{
+border-color:#B9BBDA;
+box-shadow:0 3px 10px rgba(27,29,42,0.06);
+}
+
+.reward-list-item-info{
+display:flex;
+align-items:center;
+gap:12px;
+min-width:0;
+}
+
+.reward-list-item-icon{
+width:40px;
+height:40px;
+display:flex;
+align-items:center;
+justify-content:center;
+flex:0 0 40px;
+border-radius:var(--radius-sm);
+background:#F1F1F8;
+font-size:21px;
+overflow:hidden;
+}
+.reward-list-item-icon img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.reward-list-item-title{
+font-size:14px;
+font-weight:600;
+line-height:1.3;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+}
+.reward-list-item-cost{
+margin-top:3px;
+font-size:12px;
+color:var(--ink-muted);
+}
+
 /* ---------- Student Progress Table ---------- */
 .table-toolbar{
 display:flex;
@@ -312,6 +434,34 @@ height:100%;
 background:var(--teal);
 }
 
+.sample-completion{ width:66%; }
+
+.status-pill{
+display:inline-block;
+font-size:11.5px;
+font-weight:600;
+padding:3px 9px;
+border-radius:12px;
+}
+.status-pill.pending{
+background:#FFF0C2;
+color:#8A5A00;
+border:1px solid #F5C451;
+}
+.status-pill.claimed,
+.status-pill.accepted{
+background:#DDF7E9;
+color:#167A4A;
+border:1px solid #8DD8AE;
+}
+
+.btn-confirm{
+background:var(--teal);
+color:#fff;
+}
+.btn-confirm:hover{ background:#229960; }
+.btn-confirm:disabled{ background:#B9E4CE; cursor:not-allowed; }
+
 /* ---------- Quiz List ---------- */
 #quiz-list{
 display:flex;
@@ -374,4 +524,118 @@ padding:36px 16px;
 text-align:center;
 color:var(--ink-muted);
 font-size:13.5px;
+}
+
+.is-hidden{ display:none; }
+.empty-muted{
+color:var(--ink-muted);
+font-size:13.5px;
+}
+.redemption-empty{ padding:16px 0; }
+
+#redemption-history-table{
+width:100%;
+border-collapse:collapse;
+font-size:11px;
+table-layout:fixed;
+}
+
+#redemption-history-panel .table-scroll{ overflow-x:hidden; }
+
+#redemption-history-table th:nth-child(1){ width:16%; }
+#redemption-history-table th:nth-child(2){ width:15%; }
+#redemption-history-table th:nth-child(3){ width:10%; }
+#redemption-history-table th:nth-child(4){ width:13%; }
+#redemption-history-table th:nth-child(5){ width:18%; }
+#redemption-history-table th:nth-child(6){ width:14%; }
+#redemption-history-table th:nth-child(7){ width:14%; }
+
+#redemption-history-table thead th{
+text-align:left;
+background:#F1F1F8;
+color:var(--ink-muted);
+font-size:10px;
+font-weight:600;
+padding:7px 6px;
+border-bottom:1px solid var(--border);
+white-space:nowrap;
+}
+
+#redemption-history-table tbody td{
+padding:7px 6px;
+border-bottom:1px solid var(--border);
+vertical-align:middle;
+white-space:normal;
+overflow-wrap:anywhere;
+}
+
+#redemption-history-table tbody tr:last-child td{ border-bottom:none; }
+#redemption-history-table tbody tr:hover{ background:#FAFAFD; }
+#redemption-history-table .reward-icon-cell{
+text-align:center;
+font-size:20px;
+}
+#redemption-history-table .reward-icon-cell img{
+width:24px;
+height:24px;
+object-fit:cover;
+vertical-align:middle;
+}
+#redemption-history-table .action-cell{
+white-space:normal;
+}
+#redemption-history-table .status-cell{
+padding:7px 6px;
+background:transparent;
+}
+#redemption-history-table .status-cell .status-pill{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:28px;
+height:28px;
+min-height:0;
+padding:0;
+border-radius:50%;
+vertical-align:middle;
+}
+#redemption-history-table .status-cell.pending .status-pill{
+background:#FFF0C2;
+border:1px solid #F5C451;
+}
+#redemption-history-table .status-cell.claimed .status-pill,
+#redemption-history-table .status-cell.accepted .status-pill{
+background:#DDF7E9;
+border:1px solid #8DD8AE;
+}
+#redemption-history-table .action-cell .btn{
+width:28px;
+height:28px;
+padding:0;
+margin:2px 2px 2px 0;
+font-size:16px;
+line-height:1;
+vertical-align:middle;
+}
+
+.pending-icon{
+display:inline-block;
+width:11px;
+height:11px;
+border:2px solid currentColor;
+border-right-color:transparent;
+border-radius:50%;
+vertical-align:-2px;
+}
+
+.sr-only{
+position:absolute;
+width:1px;
+height:1px;
+padding:0;
+margin:-1px;
+overflow:hidden;
+clip:rect(0, 0, 0, 0);
+white-space:nowrap;
+border:0;
 }
